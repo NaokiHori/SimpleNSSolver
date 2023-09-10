@@ -1,0 +1,8 @@
+[submodule "SimpleDecomp"]
+	path = SimpleDecomp
+	url = https://github.com/NaokiHori/SimpleDecomp
+	branch = submodule
+[submodule "SimpleNpyIO"]
+	path = SimpleNpyIO
+	url = https://github.com/NaokiHori/SimpleNpyIO
+	branch = submodule

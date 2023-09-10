@@ -1,0 +1,59 @@
+name: ExtractND
+
+on:
+
+  push:
+    branches:
+      - main
+
+jobs:
+
+  push-branches:
+    name: Create branch 2D and 3D which only contains the dimension
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dimension: [2, 3]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+        with:
+          repository: "NaokiHori/SimpleNSSolver"
+          ref: "main"
+          submodules: "recursive"
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y update && \
+          sudo apt-get -y install make libopenmpi-dev libfftw3-dev
+      - name: Remove another dimension
+        run: |
+          set -x
+          set -e
+          python .github/workflows/extract_nd_main.py ${{ matrix.dimension }}
+      - name: Modify Makefile
+        run: |
+          set -x
+          set -e
+          sed -i "s/DNDIMS=2/DNDIMS=${{ matrix.dimension }}/g" Makefile
+      - name: Compile
+        run: |
+          make all
+      - name: Commit and push change
+        run: |
+          set -x
+          set -e
+          git switch -c ${{ matrix.dimension }}d
+          git config --local user.email "36466440+NaokiHori@users.noreply.github.com"
+          git config --local user.name "NaokiHori"
+          # let IC generator of the given dimension as main.py
+          cd initial_condition
+          find . -type f -name "*d.py" | grep -v ${{ matrix.dimension }}d.py | xargs git rm
+          git mv ${{ matrix.dimension }}d.py main.py
+          cd ..
+          # add, commit, and push
+          git add Makefile
+          git add src
+          git add include
+          git commit -m "Extract ${{ matrix.dimension }}d sources" -a || true
+          git push -f origin ${{ matrix.dimension }}d
+
