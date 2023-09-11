@@ -26,7 +26,7 @@ First, I simulate for :math:`50` time units to get a random velocity field and a
 :math:`Ra` is set to an extremely high value to mimic the inviscid condition.
 This is followed by another run for :math:`10` time units, restarted from the previous simulation without the buoyancy force, so that the quadratic quantities should be conserved.
 
-To see the effect of the time step size, I consider four different safety factors :math:`0.1`, :math:`0.2`, :math:`0.4`, :math:`0.8`, which are multiplied to the maximum time step size computed in :ref:`src/fluid/decide_dt.c <fluid_decide_dt>`.
+To see the effect of the time step size, I consider four different safety factors :math:`0.1`, :math:`0.2`, :math:`0.4`, :math:`0.8`, which are multiplied to the maximum time step size computed in :ref:`src/decide_dt.c <decide_dt>`.
 
 .. mydetails:: Configurations
 

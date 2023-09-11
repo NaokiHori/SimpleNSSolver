@@ -152,7 +152,7 @@ static int decide_dt_dif(
  * @return            : (success) 0
  *                    : (failure) non-zero value
  */
-int fluid_decide_dt(
+int decide_dt(
     const domain_t * domain,
     const fluid_t * fluid,
     double * restrict dt

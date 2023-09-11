@@ -19,13 +19,6 @@ extern int fluid_save(
     const fluid_t * fluid
 );
 
-// decide next time step size
-extern int fluid_decide_dt(
-    const domain_t * domain,
-    const fluid_t * fluid,
-    double * dt
-);
-
 // predict the new velocity field and update the temperature field
 extern int fluid_compute_rhs(
     const domain_t * domain,

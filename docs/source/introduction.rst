@@ -52,15 +52,15 @@ Usage
 
    .. code-block:: console
 
-      $ mkdir -p /path/to/your/directory
-      $ cd       /path/to/your/directory
+      mkdir -p /path/to/your/directory
+      cd       /path/to/your/directory
 
 #. Get source
 
    .. code-block:: console
 
-      $ git clone --recurse-submodules https://github.com/NaokiHori/SimpleNSSolver
-      $ cd SimpleNSSolver
+      git clone --recurse-submodules https://github.com/NaokiHori/SimpleNSSolver
+      cd SimpleNSSolver
 
 #. Set initial condition
 
@@ -68,23 +68,23 @@ Usage
 
    .. code-block:: console
 
-      $ cd initial_condition
-      $ make output
-      $ bash exec.sh
-      $ cd ..
+      cd initial_condition
+      make output
+      bash exec.sh
+      cd ..
 
 #. Build solver
 
    .. code-block:: console
 
-      $ make output
-      $ make all
+      make output
+      make all
 
 #. Execute
 
    .. code-block:: console
 
-      $ bash exec.sh
+      bash exec.sh
 
 Run-time parameters are defined in `exec.sh <https://github.com/NaokiHori/SimpleNSSolver/blob/main/exec.sh>`_ as environment variables.
 

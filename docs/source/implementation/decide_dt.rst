@@ -1,29 +1,29 @@
 
 .. include:: /references.txt
 
-.. _fluid_decide_dt:
+.. _decide_dt:
 
-########################
-`src/fluid/decide_dt.c`_
-########################
+##################
+`src/decide_dt.c`_
+##################
 
-.. _src/fluid/decide_dt.c: https://github.com/NaokiHori/SimpleNSSolver/blob/main/src/fluid/decide_dt.c
+.. _src/decide_dt.c: https://github.com/NaokiHori/SimpleNSSolver/blob/main/src/decide_dt.c
 
 This file contains functions which determine the next time step size ``dt`` (:math:`\Delta t`) used to integrate the governing equations.
 
-.. mydeclare:: /../../src/fluid/decide_dt.c
+.. mydeclare:: /../../src/decide_dt.c
    :language: c
    :tag: decide_dt
 
 As discussed in :ref:`the temporal integration techniques <temporal_discretisation>`, there are two time scales in the current system which affect the stability to integrate the equations in time, which are considered separately here:
 
-.. myliteralinclude:: /../../src/fluid/decide_dt.c
+.. myliteralinclude:: /../../src/decide_dt.c
    :language: c
    :tag: compute advective and diffusive constraints
 
 After all possible time step sizes (one scalar value from the advective terms, ``NDIMS`` values from the diffusive terms) are computed, I extract the smallest value
 
-.. myliteralinclude:: /../../src/fluid/decide_dt.c
+.. myliteralinclude:: /../../src/decide_dt.c
    :language: c
    :tag: choose smallest value as dt
 
@@ -38,7 +38,7 @@ and use it as the next time step.
 Advective constraints
 *********************
 
-.. mydeclare:: /../../src/fluid/decide_dt.c
+.. mydeclare:: /../../src/decide_dt.c
    :language: c
    :tag: decide_dt_adv
 
@@ -46,19 +46,19 @@ Advective restriction is computed here, in particular by computing the ratio of 
 
 * :math:`x` direction
 
-   .. myliteralinclude:: /../../src/fluid/decide_dt.c
+   .. myliteralinclude:: /../../src/decide_dt.c
       :language: c
       :tag: compute grid-size over velocity in x
 
 * :math:`y` direction
 
-   .. myliteralinclude:: /../../src/fluid/decide_dt.c
+   .. myliteralinclude:: /../../src/decide_dt.c
       :language: c
       :tag: compute grid-size over velocity in y
 
 * :math:`z` direction
 
-   .. myliteralinclude:: /../../src/fluid/decide_dt.c
+   .. myliteralinclude:: /../../src/decide_dt.c
       :language: c
       :tag: compute grid-size over velocity in z
 
@@ -68,7 +68,7 @@ Advective restriction is computed here, in particular by computing the ratio of 
 
 After unifying the result among all processes, a safety factor (given by the user) is multiplied:
 
-.. myliteralinclude:: /../../src/fluid/decide_dt.c
+.. myliteralinclude:: /../../src/decide_dt.c
    :language: c
    :tag: unify result, multiply safety factor
 
@@ -76,7 +76,7 @@ After unifying the result among all processes, a safety factor (given by the use
 Diffusive constraints
 *********************
 
-.. mydeclare:: /../../src/fluid/decide_dt.c
+.. mydeclare:: /../../src/decide_dt.c
    :language: c
    :tag: decide_dt_dif
 
@@ -88,7 +88,7 @@ Diffusive restrictions in all dimensions are computed here following
 
 in each dimension, where :math:`C` is a pre-factor (the inverse of the diffusivity times the safety factor) and :math:`\min \left( \Delta x_i \right)` is the smallest grid size in the direction:
 
-.. myliteralinclude:: /../../src/fluid/decide_dt.c
+.. myliteralinclude:: /../../src/decide_dt.c
    :language: c
    :tag: compute diffusive constraints
 

@@ -3,6 +3,7 @@
 #include "fluid.h"
 #include "fluid_solver.h"
 #include "integrate.h"
+#include "decide_dt.h"
 
 // integrate the equations for one time step
 int integrate(
@@ -11,7 +12,7 @@ int integrate(
     double * dt
 ){
   // decide time step size
-  if(0 != fluid_decide_dt(domain, fluid, dt)){
+  if(0 != decide_dt(domain, fluid, dt)){
     return 1;
   }
   // Runge-Kutta iterations

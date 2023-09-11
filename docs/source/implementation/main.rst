@@ -20,6 +20,7 @@ In particular I aim to describe :ref:`the discretisations of the equations <nume
 .. toctree::
    :maxdepth: 1
 
+   decide_dt
    domain
    fileio
    fluid/main

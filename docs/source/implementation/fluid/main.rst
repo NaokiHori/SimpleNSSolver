@@ -15,7 +15,6 @@ This directory contains source files which are used to integrate the :ref:`gover
    boundary
    compute_potential/main
    correct_velocity
-   decide_dt
    init
    integrate/main
    update_pressure
