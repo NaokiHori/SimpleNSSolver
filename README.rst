@@ -148,13 +148,11 @@ Preparation
 Simulation
 ==========
 
-To launch the simulator to integrate equations in time, execute
+.. code-block:: console
 
-   .. code-block:: console
+   bash exec.sh
 
-      bash exec.sh
-
-giving e.g.
+launches the simulator and integrate the equations in time, giving e.g.
 
 .. code-block:: text
 
@@ -215,34 +213,27 @@ Several log files, snapshots of the flow fields (which are used to restart the s
    │  ├── nusselt.dat
    │  └── progress.dat
    ├── save
-   │  ├── step0000001054
-   │  ├── step0000002024
-   │  ├── step0000002887
-   │  ├── step0000003708
-   │  ├── step0000004474
-   │  ├── step0000005228
-   │  ├── step0000006004
-   │  ├── step0000006766
-   │  ├── step0000007522
-   │  └── step0000008279
+   │  ├── step00000xxxxx
+   │  ├── step00000yyyyy
+   ...
+   │  └── step00000zzzzz
    └── stat
-      └── step0000008279
+      └── step00000zzzzz
 
 Log files (files under ``output/log`` directory) are written in ASCII format, which are to monitor the progress.
 
-Since I adopt the FFT-based Poisson solver, local divergence of the flow field is comparable to machine epsilon when uniform grid spacing is adopted in the wall-normal direction.
-Even when a stretched grid is used, the values should be still small enough (depending on how much the grid is distorted), e.g.,
+For example, since I adopt the FFT-based Poisson solver in this project, local divergence of the flow field should be small enough, which is written in ``output/log/divergence.dat``:
 
 .. image:: https://naokihori.github.io/SimpleNSSolver/_images/divergence_2d.png
    :width: 50%
 
-Also Nusselt numbers (computed based on different definitions) are monitored, giving e.g.
+Also the Nusselt numbers (computed based on several different definitions, see the `documentation`_) are monitored and written in ``output/log/nusselt.dat``:
 
 .. image:: https://naokihori.github.io/SimpleNSSolver/_images/nusselt_time_2d.png
    :width: 50%
 
-Flow fields and statistical data are stored in `NPY format <https://numpy.org/doc/stable/reference/generated/numpy.lib.format.html>`_ using `SimpleNpyIO <https://github.com/NaokiHori/SimpleNpyIO>`_, which is already contained in this library.
-When ``Python`` with ``NumPy`` and ``Matplotlib`` is installed, the flow fields can be easily visualised, e.g.,
+Flow fields and statistical data are stored in `NPY format <https://numpy.org/doc/stable/reference/generated/numpy.lib.format.html>`_ using `SimpleNpyIO <https://github.com/NaokiHori/SimpleNpyIO>`_.
+When ``Python3`` with ``NumPy`` and ``Matplotlib`` is installed, one can easily visualise the flow fields:
 
 .. image:: https://naokihori.github.io/SimpleNSSolver/_images/snapshot_2d.png
    :width: 50%
@@ -258,7 +249,7 @@ or the mean heat flux:
 .. image:: https://naokihori.github.io/SimpleNSSolver/_images/nusselt_x_2d.png
    :width: 50%
 
-By varying the parameter, one can observe a scaling:
+By varying the parameter (in particular the Rayleigh number ``Ra``), one can observe a famous scaling law:
 
 .. image:: https://naokihori.github.io/SimpleNSSolver/_images/nu_ra.png
    :width: 50%
@@ -270,9 +261,9 @@ See the `documentation`_ for more details.
 3D simulation
 *************
 
-By default, this project simulates two-dimensional cases because they are easy to test.
-When the three-dimensional counterpart is needed, please checkout the ``3d`` branch.
-Note that the ``main`` branch contains both dimensions, which is for me to develop both cases at the same time.
+By default, this project simulates two-dimensional cases because they are easy to test and thus can be a good starting point.
+When the three-dimensional counterpart is needed, checkout the ``3d`` branch.
+Note that the ``main`` branch contains both dimensions, which is for the developers to maintain both cases at the same time.
 
 Please refer to the `examples`_, where several small-scale 3D simulations are attempted as a part of the continuous integration.
 

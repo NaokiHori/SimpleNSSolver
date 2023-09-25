@@ -437,30 +437,38 @@ static int output(
   // save domain info (coordinates)
   domain_save(g_dirname, domain);
   // save collected statistics
+  // prepare list of all variables to be dumped
+  typedef struct {
+    const char * name;
+    const array_t * array;
+  } variable_t;
+  const variable_t variables[] = {
+    {.name = "ux1", .array = &g_ux1},
+    {.name = "ux2", .array = &g_ux2},
+    {.name = "uy1", .array = &g_uy1},
+    {.name = "uy2", .array = &g_uy2},
+#if NDIMS == 3
+    {.name = "uz1", .array = &g_uz1},
+    {.name = "uz2", .array = &g_uz2},
+#endif
+    {.name = "t1",  .array = &g_t1 },
+    {.name = "t2",  .array = &g_t2 },
+    {.name = "uxt", .array = &g_uxt},
+  };
+  // for each variable, call corresponding saver
+  const size_t nvars = sizeof(variables) / sizeof(variable_t);
   if(g_reduction){
-    reduce_and_write(domain, g_dirname, "ux1", &g_ux1);
-    reduce_and_write(domain, g_dirname, "ux2", &g_ux2);
-    reduce_and_write(domain, g_dirname, "uy1", &g_uy1);
-    reduce_and_write(domain, g_dirname, "uy2", &g_uy2);
-#if NDIMS == 3
-    reduce_and_write(domain, g_dirname, "uz1", &g_uz1);
-    reduce_and_write(domain, g_dirname, "uz2", &g_uz2);
-#endif
-    reduce_and_write(domain, g_dirname,  "t1", &g_t1);
-    reduce_and_write(domain, g_dirname,  "t2", &g_t2);
-    reduce_and_write(domain, g_dirname, "uxt", &g_uxt);
+    // reduce 3D array to 1D vector
+    for(size_t n = 0; n < nvars; n++){
+      const variable_t * v = variables + n;
+      reduce_and_write(domain, g_dirname, v->name, v->array);
+    }
   }else{
-    array.dump(domain, g_dirname, "ux1", fileio.npy_double, &g_ux1);
-    array.dump(domain, g_dirname, "ux2", fileio.npy_double, &g_ux2);
-    array.dump(domain, g_dirname, "uy1", fileio.npy_double, &g_uy1);
-    array.dump(domain, g_dirname, "uy2", fileio.npy_double, &g_uy2);
-#if NDIMS == 3
-    array.dump(domain, g_dirname, "uz1", fileio.npy_double, &g_uz1);
-    array.dump(domain, g_dirname, "uz2", fileio.npy_double, &g_uz2);
-#endif
-    array.dump(domain, g_dirname,  "t1", fileio.npy_double, &g_t1);
-    array.dump(domain, g_dirname,  "t2", fileio.npy_double, &g_t2);
-    array.dump(domain, g_dirname, "uxt", fileio.npy_double, &g_uxt);
+    // dump 3D field (as it is)
+    for(size_t n = 0; n < nvars; n++){
+      const variable_t * v = variables + n;
+      array.dump(domain, g_dirname, v->name, fileio.npy_double, v->array);
+    }
   }
   return 0;
 }
