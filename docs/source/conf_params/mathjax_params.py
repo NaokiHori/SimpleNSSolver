@@ -1,98 +1,105 @@
 mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
-mathjax3_config = {
-    "TeX": {
-        "Macros": {
-            "der": ["{\\frac{\\partial #1}{\\partial #2}}", 2], # derivative
-            "dder": ["{\\frac{\\delta #1}{\\delta #2}}", 2],    # discrete derivative
-            "mst": ["{\\gamma^{#1 #2}}", 2], # mesh skewness tensor
-            "gx": ["{\\xi}"],
-            "gy": ["{\\eta}"],
-            "gz": ["{\\zeta}"],
-            "ux": ["{u_x}"],
-            "uy": ["{u_y}"],
-            "uz": ["{u_z}"],
-            "intrp": ["{\\overline{#1}^{#2}}", 2], # interpolation
-            "diffe": ["{\\delta_{#2} {#1}}", 2],   # differentiation
-            "vat": ["{\\left. {#1} \\right|_{#2}}", 2], # value at
-            "ave": ["{\\left\\langle {#1} \\right\\rangle_{#2}}", 2],
-            ## indices, pressure, x-face, y-face in two directions
-            # p-i
-            "pimm": ["i-1           "],
-            "pim":  ["i-\\frac{1}{2}"],
-            "pic":  ["i             "],
-            "pip":  ["i+\\frac{1}{2}"],
-            "pipp": ["i+1           "],
-            # p-j
-            "pjmm": ["j-1           "],
-            "pjm":  ["j-\\frac{1}{2}"],
-            "pjc":  ["j             "],
-            "pjp":  ["j+\\frac{1}{2}"],
-            "pjpp": ["j+1           "],
-            # p-k
-            "pkmm": ["k-1           "],
-            "pkm":  ["k-\\frac{1}{2}"],
-            "pkc":  ["k             "],
-            "pkp":  ["k+\\frac{1}{2}"],
-            "pkpp": ["k+1           "],
-            # x-i
-            "ximm": ["i-\\frac{1}{2}"],
-            "xim":  ["i             "],
-            "xic":  ["i+\\frac{1}{2}"],
-            "xip":  ["i+1           "],
-            "xipp": ["i+\\frac{3}{2}"],
-            # x-j
-            "xjmm": ["j-1           "],
-            "xjm":  ["j-\\frac{1}{2}"],
-            "xjc":  ["j             "],
-            "xjp":  ["j+\\frac{1}{2}"],
-            "xjpp": ["j+1           "],
-            # x-k
-            "xkmm": ["k-1           "],
-            "xkm":  ["k-\\frac{1}{2}"],
-            "xkc":  ["k             "],
-            "xkp":  ["k+\\frac{1}{2}"],
-            "xkpp": ["k+1           "],
-            # y-i
-            "yimm": ["i-1           "],
-            "yim":  ["i-\\frac{1}{2}"],
-            "yic":  ["i             "],
-            "yip":  ["i+\\frac{1}{2}"],
-            "yipp": ["i+1           "],
-            # y-j
-            "yjmm": ["j-\\frac{1}{2}"],
-            "yjm":  ["j             "],
-            "yjc":  ["j+\\frac{1}{2}"],
-            "yjp":  ["j+1           "],
-            "yjpp": ["j+\\frac{3}{2}"],
-            # y-k
-            "ykmm": ["k-1           "],
-            "ykm":  ["k-\\frac{1}{2}"],
-            "ykc":  ["k             "],
-            "ykp":  ["k+\\frac{1}{2}"],
-            "ykpp": ["k+1           "],
-            # z-i
-            "zimm": ["i-1           "],
-            "zim":  ["i-\\frac{1}{2}"],
-            "zic":  ["i             "],
-            "zip":  ["i+\\frac{1}{2}"],
-            "zipp": ["i+1           "],
-            # z-j
-            "zjmm": ["j-1           "],
-            "zjm":  ["j-\\frac{1}{2}"],
-            "zjc":  ["j             "],
-            "zjp":  ["j+\\frac{1}{2}"],
-            "zjpp": ["j+1           "],
-            # z-k
-            "zkmm": ["k-\\frac{1}{2}"],
-            "zkm":  ["k             "],
-            "zkc":  ["k+\\frac{1}{2}"],
-            "zkp":  ["k+1           "],
-            "zkpp": ["k+\\frac{3}{2}"],
-            #
-            "dintrpa": ["{\\overline {#1}^{\\left( A,#2 \\right)}}", 2], # discrete arithmetic average
-            "dintrpv": ["{\\overline {#1}^{\\left( V,#2 \\right)}}", 2], # discrete volume average
-            "dintrpu": ["{\\overline {#1}^{\\left( U,#2 \\right)}}", 2], # discrete average, unknown
-        }
-    }
-}
 
+macros = dict()
+
+# general coordinates
+macros["gx"] = "{\\xi}"
+macros["gy"] = "{\\eta}"
+macros["gz"] = "{\\zeta}"
+
+# velocity
+macros["ux"] = "{u_x}"
+macros["uy"] = "{u_y}"
+macros["uz"] = "{u_z}"
+
+# cell centers
+macros["pimm"] = "i-1           "
+macros["pim" ] = "i-\\frac{1}{2}"
+macros["pic" ] = "i             "
+macros["pip" ] = "i+\\frac{1}{2}"
+macros["pipp"] = "i+1           "
+macros["pjmm"] = "j-1           "
+macros["pjm" ] = "j-\\frac{1}{2}"
+macros["pjc" ] = "j             "
+macros["pjp" ] = "j+\\frac{1}{2}"
+macros["pjpp"] = "j+1           "
+macros["pkmm"] = "k-1           "
+macros["pkm" ] = "k-\\frac{1}{2}"
+macros["pkc" ] = "k             "
+macros["pkp" ] = "k+\\frac{1}{2}"
+macros["pkpp"] = "k+1           "
+
+# x cell faces
+macros["ximm"] = "i-\\frac{1}{2}"
+macros["xim" ] = "i             "
+macros["xic" ] = "i+\\frac{1}{2}"
+macros["xip" ] = "i+1           "
+macros["xipp"] = "i+\\frac{3}{2}"
+macros["xjmm"] = "j-1           "
+macros["xjm" ] = "j-\\frac{1}{2}"
+macros["xjc" ] = "j             "
+macros["xjp" ] = "j+\\frac{1}{2}"
+macros["xjpp"] = "j+1           "
+macros["xkmm"] = "k-1           "
+macros["xkm" ] = "k-\\frac{1}{2}"
+macros["xkc" ] = "k             "
+macros["xkp" ] = "k+\\frac{1}{2}"
+macros["xkpp"] = "k+1           "
+
+# y cell faces
+macros["yimm"] = "i-1           "
+macros["yim" ] = "i-\\frac{1}{2}"
+macros["yic" ] = "i             "
+macros["yip" ] = "i+\\frac{1}{2}"
+macros["yipp"] = "i+1           "
+macros["yjmm"] = "j-\\frac{1}{2}"
+macros["yjm" ] = "j             "
+macros["yjc" ] = "j+\\frac{1}{2}"
+macros["yjp" ] = "j+1           "
+macros["yjpp"] = "j+\\frac{3}{2}"
+macros["ykmm"] = "k-1           "
+macros["ykm" ] = "k-\\frac{1}{2}"
+macros["ykc" ] = "k             "
+macros["ykp" ] = "k+\\frac{1}{2}"
+macros["ykpp"] = "k+1           "
+
+# z cell faces
+macros["zimm"] = "i-1           "
+macros["zim" ] = "i-\\frac{1}{2}"
+macros["zic" ] = "i             "
+macros["zip" ] = "i+\\frac{1}{2}"
+macros["zipp"] = "i+1           "
+macros["zjmm"] = "j-1           "
+macros["zjm" ] = "j-\\frac{1}{2}"
+macros["zjc" ] = "j             "
+macros["zjp" ] = "j+\\frac{1}{2}"
+macros["zjpp"] = "j+1           "
+macros["zkmm"] = "k-\\frac{1}{2}"
+macros["zkm" ] = "k             "
+macros["zkc" ] = "k+\\frac{1}{2}"
+macros["zkp" ] = "k+1           "
+macros["zkpp"] = "k+\\frac{3}{2}"
+
+# derivatives, continuous and discrete
+macros["der"]  = ["{\\frac{\\partial #1}{\\partial #2}}", 2]
+macros["dder"] = ["{\\frac{\\delta #1}{\\delta #2}}", 2]
+
+# mesh skewness tensor
+macros["mst"] = ["{\\gamma^{#1 #2}}", 2]
+
+# interpolation and differentiation
+macros["intrp"] = ["{\\overline{#1}^{#2}}", 2]
+macros["diffe"] = ["{\\delta_{#2} {#1}}", 2]
+
+# value at
+macros["vat"] = ["{\\left. {#1} \\right|_{#2}}", 2]
+
+# average
+macros["ave"] = ["{\\left\\langle {#1} \\right\\rangle_{#2}}", 2]
+
+# interpolations, arithmetic, volume, unknown
+macros["dintrpa"] = ["{\\overline {#1}^{\\left( A,#2 \\right)}}", 2]
+macros["dintrpv"] = ["{\\overline {#1}^{\\left( V,#2 \\right)}}", 2]
+macros["dintrpu"] = ["{\\overline {#1}^{\\left( U,#2 \\right)}}", 2]
+
+mathjax3_config = {"TeX": {"Macros": macros}}
