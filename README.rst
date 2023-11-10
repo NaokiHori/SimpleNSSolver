@@ -21,6 +21,7 @@ Simple Navier-Stokes Solver
 .. thumbnails
 
 .. image:: https://github.com/NaokiHori/SimpleNSSolver/blob/main/docs/source/thumbnail.gif
+   :target: https://youtu.be/WUfq8PcEhpU
    :width: 800
 
 .. image:: https://github.com/NaokiHori/SimpleNSSolver/blob/main/docs/source/snapshot3d.png
