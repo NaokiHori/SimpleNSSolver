@@ -28,7 +28,7 @@ if __name__ == "__main__":
     time, lx, ly, lz, x, y, z, t = load(idname)
     grid = pyvista.RectilinearGrid(x, y, z)
     t = np.ravel(t)
-    my_theme = themes.DefaultTheme()
+    my_theme = themes.Theme()
     my_theme.lighting = True
     my_theme.show_edges = False
     my_theme.background = "#000000"
