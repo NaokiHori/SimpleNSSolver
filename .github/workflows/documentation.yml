@@ -81,7 +81,7 @@ jobs:
       - name: Setup GitHub Pages
         uses: actions/configure-pages@main
       - name: Upload HTML
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@main
         with:
           path: docs/build/html
       - name: Deploy to GitHub Pages
