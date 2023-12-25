@@ -35,9 +35,6 @@ Simple Navier-Stokes Solver
 .. _examples: https://naokihori.github.io/SimpleNSSolver/examples/main.html
 .. _documentation: https://naokihori.github.io/SimpleNSSolver
 
-.. contents::
-   :depth: 1
-
 ********
 Overview
 ********
