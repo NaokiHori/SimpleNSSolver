@@ -28,7 +28,7 @@ jobs:
           sudo apt-get -y update && \
           sudo apt-get -y install make libopenmpi-dev libfftw3-dev
       - name: Setup headless display
-        uses: pyvista/setup-headless-display-action@v2
+        uses: pyvista/setup-headless-display-action@main
       - name: Install python dependencies for pre- and post-processings
         run: |
           python -m pip install --upgrade pip
@@ -37,7 +37,7 @@ jobs:
         run: |
           bash docs/source/examples/typical/data/exec_${{ matrix.dimension }}d.sh
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: typical-cases-${{ matrix.dimension }}d
           path: artifacts
@@ -68,7 +68,7 @@ jobs:
         run: |
           bash docs/source/examples/energy/data/exec_${{ matrix.dimension }}d.sh
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: check-energy-conservations-${{ matrix.dimension }}d
           path: artifacts
@@ -100,7 +100,7 @@ jobs:
         run: |
           bash docs/source/examples/nu/data/exec_${{ matrix.dimension }}d.sh ${{ matrix.prandtl }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: check-nusselt-agreements-${{ matrix.prandtl }}-${{ matrix.dimension }}d
           path: artifacts
@@ -131,7 +131,7 @@ jobs:
         run: |
           bash docs/source/examples/gl/data/exec.sh ${{ matrix.rayleigh }}
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: gl-${{ matrix.rayleigh }}
           path: artifacts
@@ -155,47 +155,47 @@ jobs:
         run: |
           mkdir data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-1.0e+4
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-3.1e+4
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-1.0e+5
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-3.1e+5
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-1.0e+6
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-3.1e+6
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-1.0e+7
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-3.1e+7
           path: data
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: gl-1.0e+8
           path: data
@@ -207,7 +207,7 @@ jobs:
             data \
             artifacts/nu_ra.png
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: gl
           path: artifacts

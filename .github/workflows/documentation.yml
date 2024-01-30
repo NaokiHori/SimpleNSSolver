@@ -55,7 +55,7 @@ jobs:
             sphinxdoc/sphinx:latest \
             sphinx-build -b html docs/source docs/build
       - name: Upload HTML artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
           name: DocHTML
           path: docs/build
@@ -76,7 +76,7 @@ jobs:
     needs: [build-doc]
     steps:
       - name: Download HTML artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@main
         with:
           name: DocHTML
           path: artifacts
