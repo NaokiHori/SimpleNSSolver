@@ -11,18 +11,11 @@
 #include "config.h"
 #include "array_macros/fluid/ux.h"
 #include "array_macros/fluid/uy.h"
-#if NDIMS == 3
-#include "array_macros/fluid/uz.h"
-#endif
 #include "array_macros/fluid/t.h"
 #include "array_macros/statistics/ux1.h"
 #include "array_macros/statistics/ux2.h"
 #include "array_macros/statistics/uy1.h"
 #include "array_macros/statistics/uy2.h"
-#if NDIMS == 3
-#include "array_macros/statistics/uz1.h"
-#include "array_macros/statistics/uz2.h"
-#endif
 #include "array_macros/statistics/t1.h"
 #include "array_macros/statistics/t2.h"
 #include "array_macros/statistics/uxt.h"
@@ -49,10 +42,6 @@ static array_t g_ux1 = {0};
 static array_t g_ux2 = {0};
 static array_t g_uy1 = {0};
 static array_t g_uy2 = {0};
-#if NDIMS == 3
-static array_t g_uz1 = {0};
-static array_t g_uz2 = {0};
-#endif
 static array_t g_t1 = {0};
 static array_t g_t2 = {0};
 static array_t g_uxt = {0};
@@ -92,10 +81,6 @@ static int init(
   if(0 != array.prepare(domain, UX2_NADDS, sizeof(double), &g_ux2)) return 1;
   if(0 != array.prepare(domain, UY1_NADDS, sizeof(double), &g_uy1)) return 1;
   if(0 != array.prepare(domain, UY2_NADDS, sizeof(double), &g_uy2)) return 1;
-#if NDIMS == 3
-  if(0 != array.prepare(domain, UZ1_NADDS, sizeof(double), &g_uz1)) return 1;
-  if(0 != array.prepare(domain, UZ2_NADDS, sizeof(double), &g_uz2)) return 1;
-#endif
   if(0 != array.prepare(domain, T1_NADDS,  sizeof(double), &g_t1 )) return 1;
   if(0 != array.prepare(domain, T2_NADDS,  sizeof(double), &g_t2 )) return 1;
   if(0 != array.prepare(domain, UXT_NADDS, sizeof(double), &g_uxt)) return 1;
@@ -135,28 +120,14 @@ static void collect_mean_ux(
 ){
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
-  const int ksize = domain->mysizes[2];
-#endif
   double * restrict ux1 = g_ux1.data;
   double * restrict ux2 = g_ux2.data;
-#if NDIMS == 2
   for(int j = 1; j <= jsize; j++){
     for(int i = 1; i <= isize + 1; i++){
       UX1(i, j) += pow(UX(i, j), 1.);
       UX2(i, j) += pow(UX(i, j), 2.);
     }
   }
-#else
-  for(int k = 1; k <= ksize; k++){
-    for(int j = 1; j <= jsize; j++){
-      for(int i = 1; i <= isize + 1; i++){
-        UX1(i, j, k) += pow(UX(i, j, k), 1.);
-        UX2(i, j, k) += pow(UX(i, j, k), 2.);
-      }
-    }
-  }
-#endif
 }
 
 /**
@@ -170,55 +141,15 @@ static void collect_mean_uy(
 ){
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
-  const int ksize = domain->mysizes[2];
-#endif
   double * restrict uy1 = g_uy1.data;
   double * restrict uy2 = g_uy2.data;
-#if NDIMS == 2
   for(int j = 1; j <= jsize; j++){
     for(int i = 0; i <= isize + 1; i++){
       UY1(i, j) += pow(UY(i, j), 1.);
       UY2(i, j) += pow(UY(i, j), 2.);
     }
   }
-#else
-  for(int k = 1; k <= ksize; k++){
-    for(int j = 1; j <= jsize; j++){
-      for(int i = 0; i <= isize + 1; i++){
-        UY1(i, j, k) += pow(UY(i, j, k), 1.);
-        UY2(i, j, k) += pow(UY(i, j, k), 2.);
-      }
-    }
-  }
-#endif
 }
-
-#if NDIMS == 3
-/**
- * @brief compute uz^1 and uz^2 and add results to the arrays
- * @param[in] domain : information related to MPI domain decomposition
- * @param[in] uz     : z velocity
- */
-static void collect_mean_uz(
-    const domain_t * domain,
-    const double * restrict uz
-){
-  const int isize = domain->mysizes[0];
-  const int jsize = domain->mysizes[1];
-  const int ksize = domain->mysizes[2];
-  double * restrict uz1 = g_uz1.data;
-  double * restrict uz2 = g_uz2.data;
-  for(int k = 1; k <= ksize; k++){
-    for(int j = 1; j <= jsize; j++){
-      for(int i = 0; i <= isize + 1; i++){
-        UZ1(i, j, k) += pow(UZ(i, j, k), 1.);
-        UZ2(i, j, k) += pow(UZ(i, j, k), 2.);
-      }
-    }
-  }
-}
-#endif
 
 /**
  * @brief compute T^1 and T^2 and add results to the arrays
@@ -231,28 +162,14 @@ static void collect_mean_t(
 ){
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
-  const int ksize = domain->mysizes[2];
-#endif
   double * restrict t1 = g_t1.data;
   double * restrict t2 = g_t2.data;
-#if NDIMS == 2
   for(int j = 1; j <= jsize; j++){
     for(int i = 0; i <= isize + 1; i++){
       T1(i, j) += pow(T(i, j), 1.);
       T2(i, j) += pow(T(i, j), 2.);
     }
   }
-#else
-  for(int k = 1; k <= ksize; k++){
-    for(int j = 1; j <= jsize; j++){
-      for(int i = 0; i <= isize + 1; i++){
-        T1(i, j, k) += pow(T(i, j, k), 1.);
-        T2(i, j, k) += pow(T(i, j, k), 2.);
-      }
-    }
-  }
-#endif
 }
 
 /**
@@ -268,11 +185,7 @@ static void collect_uxt(
 ){
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
-  const int ksize = domain->mysizes[2];
-#endif
   double * restrict uxt = g_uxt.data;
-#if NDIMS == 2
   for(int j = 1; j <= jsize; j++){
     for(int i = 1; i <= isize + 1; i++){
       const double t_ =
@@ -281,18 +194,6 @@ static void collect_uxt(
       UXT(i, j) += UX(i, j) * t_;
     }
   }
-#else
-  for(int k = 1; k <= ksize; k++){
-    for(int j = 1; j <= jsize; j++){
-      for(int i = 1; i <= isize + 1; i++){
-        const double t_ =
-          + 0.5 * T(i-1, j  , k  )
-          + 0.5 * T(i  , j  , k  );
-        UXT(i, j, k) += UX(i, j, k) * t_;
-      }
-    }
-  }
-#endif
 }
 
 /**
@@ -308,9 +209,6 @@ static int collect(
   // collect temporally-averaged quantities
   collect_mean_ux(domain, fluid->ux.data);
   collect_mean_uy(domain, fluid->uy.data);
-#if NDIMS == 3
-  collect_mean_uz(domain, fluid->uz.data);
-#endif
   collect_mean_t(domain, fluid->t.data);
   collect_uxt(domain, fluid->ux.data, fluid->t.data);
   // assign diffusivities
@@ -341,37 +239,17 @@ static int reduce_and_write(
     printf("stat array seems to have irregular shape in y\n");
     return 1;
   }
-#if NDIMS == 3
-  // NOTE: assuming no halo cells in z
-  if(0 != array->nadds[2][0] || 0 != array->nadds[2][1]){
-    printf("stat array seems to have irregular shape in z\n");
-    return 1;
-  }
-#endif
   const int isize = domain->mysizes[0]
                   + array->nadds[0][0]
                   + array->nadds[0][1];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
-  const int ksize = domain->mysizes[2];
-#endif
   const double * restrict data = array->data;
   double * restrict vec = memory_calloc(isize, sizeof(double));
-#if NDIMS == 2
   for(int j = 0; j < jsize; j++){
     for(int i = 0; i < isize; i++){
       vec[i] += data[j * isize + i];
     }
   }
-#else
-  for(int k = 0; k < ksize; k++){
-    for(int j = 0; j < jsize; j++){
-      for(int i = 0; i < isize; i++){
-        vec[i] += data[k * jsize * isize + j * isize + i];
-      }
-    }
-  }
-#endif
   const int root = 0;
   int myrank = root;
   sdecomp.get_comm_rank(domain->info, &myrank);
@@ -447,10 +325,6 @@ static int output(
     {.name = "ux2", .array = &g_ux2},
     {.name = "uy1", .array = &g_uy1},
     {.name = "uy2", .array = &g_uy2},
-#if NDIMS == 3
-    {.name = "uz1", .array = &g_uz1},
-    {.name = "uz2", .array = &g_uz2},
-#endif
     {.name = "t1",  .array = &g_t1 },
     {.name = "t2",  .array = &g_t2 },
     {.name = "uxt", .array = &g_uxt},

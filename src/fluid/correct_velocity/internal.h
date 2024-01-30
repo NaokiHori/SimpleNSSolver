@@ -13,12 +13,4 @@ extern int fluid_correct_velocity_uy(
     fluid_t * fluid
 );
 
-#if NDIMS == 3
-extern int fluid_correct_velocity_uz(
-    const domain_t * domain,
-    const double prefactor,
-    fluid_t * fluid
-);
-#endif
-
 #endif // FLUID_CORRECT_VELOCITY_INTERNAL_H

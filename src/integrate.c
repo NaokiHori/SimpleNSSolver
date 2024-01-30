@@ -18,7 +18,7 @@ int integrate(
   // Runge-Kutta iterations
   // max iteration, should be three
   for(size_t rkstep = 0; rkstep < RKSTEPMAX; rkstep++){
-    // predict flow field | 14
+    // predict flow field
     // compute right-hand-side terms of RK scheme
     if(0 != fluid_compute_rhs(domain, fluid)){
       return 1;
@@ -33,18 +33,18 @@ int integrate(
     if(0 != fluid_predict_field(domain, rkstep, *dt, fluid)){
       return 1;
     }
-    // compute scalar potential | 6
+    // compute scalar potential
     // now the temperature field has been updated,
     //   while the velocity field is not divergence free
     //   and thus the following correction step is needed
     if(0 != fluid_compute_potential(domain, rkstep, *dt, fluid)){
       return 1;
     }
-    // correct velocity field to satisfy mass conservation | 3
+    // correct velocity field to satisfy mass conservation
     if(0 != fluid_correct_velocity(domain, rkstep, *dt, fluid)){
       return 1;
     }
-    // update pressure | 3
+    // update pressure
     if(0 != fluid_update_pressure(domain, rkstep, *dt, fluid)){
       return 1;
     }

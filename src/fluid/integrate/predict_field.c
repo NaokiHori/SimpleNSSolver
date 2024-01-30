@@ -23,11 +23,6 @@ int fluid_predict_field(
   if(0 != update_uy(domain, rkstep, dt, fluid)){
     return 1;
   }
-#if NDIMS == 3
-  if(0 != update_uz(domain, rkstep, dt, fluid)){
-    return 1;
-  }
-#endif
   if(0 != update_t (domain, rkstep, dt, fluid)){
     return 1;
   }

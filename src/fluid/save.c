@@ -21,9 +21,6 @@ int fluid_save(
   // collective
   array.dump(domain, dirname, "ux", fileio.npy_double, &fluid->ux);
   array.dump(domain, dirname, "uy", fileio.npy_double, &fluid->uy);
-#if NDIMS == 3
-  array.dump(domain, dirname, "uz", fileio.npy_double, &fluid->uz);
-#endif
   array.dump(domain, dirname,  "p", fileio.npy_double, &fluid-> p);
   array.dump(domain, dirname,  "t", fileio.npy_double, &fluid-> t);
   return 0;
