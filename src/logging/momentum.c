@@ -6,9 +6,7 @@
 #include "array_macros/domain/dxc.h"
 #include "array_macros/fluid/ux.h"
 #include "array_macros/fluid/uy.h"
-#if NDIMS == 3
 #include "array_macros/fluid/uz.h"
-#endif
 #include "internal.h"
 
 /**
@@ -32,31 +30,16 @@ int logging_check_momentum(
   sdecomp.get_comm_cart(domain->info, &comm_cart);
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   const double * restrict dxf = domain->dxf;
   const double * restrict dxc = domain->dxc;
   const double dy = domain->dy;
-#if NDIMS == 3
   const double dz = domain->dz;
-#endif
   const double * restrict ux = fluid->ux.data;
   const double * restrict uy = fluid->uy.data;
-#if NDIMS == 3
   const double * restrict uz = fluid->uz.data;
-#endif
   double moms[NDIMS] = {0.};
-  // compute total x-momentum | 19
-#if NDIMS == 2
-  for(int j = 1; j <= jsize; j++){
-    for(int i = 2; i <= isize; i++){
-      const double dx = DXC(i  );
-      const double cellsize = dx * dy;
-      moms[0] += UX(i, j) * cellsize;
-    }
-  }
-#else
+  // compute total x-momentum
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 2; i <= isize; i++){
@@ -66,17 +49,7 @@ int logging_check_momentum(
       }
     }
   }
-#endif
-  // compute total y-momentum | 19
-#if NDIMS == 2
-  for(int j = 1; j <= jsize; j++){
-    for(int i = 1; i <= isize; i++){
-      const double dx = DXF(i  );
-      const double cellsize = dx * dy;
-      moms[1] += UY(i, j) * cellsize;
-    }
-  }
-#else
+  // compute total y-momentum
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 1; i <= isize; i++){
@@ -86,9 +59,7 @@ int logging_check_momentum(
       }
     }
   }
-#endif
-#if NDIMS == 3
-  // compute total z-momentum | 9
+  // compute total z-momentum
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 1; i <= isize; i++){
@@ -98,7 +69,6 @@ int logging_check_momentum(
       }
     }
   }
-#endif
   const void * sendbuf = root == myrank ? MPI_IN_PLACE : moms;
   void * recvbuf = moms;
   MPI_Reduce(sendbuf, recvbuf, NDIMS, MPI_DOUBLE, MPI_SUM, root, comm_cart);

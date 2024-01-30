@@ -1,4 +1,3 @@
-#if NDIMS == 3
 #include "param.h"
 #include "memory.h"
 #include "runge_kutta.h"
@@ -35,7 +34,7 @@ static laplacians_t laplacians = {
 static int init_lap(
     const domain_t * domain
 ){
-  // Laplacian w.r.t. uz in x | 14
+  // Laplacian w.r.t. uz in x
   {
     const size_t isize = domain->glsizes[0];
     const double * dxf = domain->dxf;
@@ -50,14 +49,14 @@ static int init_lap(
       laplacians.LAPX(i)[2] = u;
     }
   }
-  // Laplacian in y | 6
+  // Laplacian in y
   {
     const double dy = domain->dy;
     laplacians.lapy[0] = + 1. / dy / dy;
     laplacians.lapy[1] = - 2. / dy / dy;
     laplacians.lapy[2] = + 1. / dy / dy;
   }
-  // Laplacian in z | 6
+  // Laplacian in z
   {
     const double dz = domain->dz;
     laplacians.lapz[0] = + 1. / dz / dz;
@@ -88,7 +87,7 @@ static int advection_x(
   const int ksize = domain->mysizes[2];
   const double * restrict dxf = domain->dxf;
   BEGIN
-    // uz is transported by ux | 9
+    // uz is transported by ux
     const double ux_l = + 0.5 * UX(i  , j  , k-1) + 0.5 * UX(i  , j  , k  );
     const double ux_u = + 0.5 * UX(i+1, j  , k-1) + 0.5 * UX(i+1, j  , k  );
     const double l = + 0.5 / DXF(i  ) * ux_l;
@@ -113,7 +112,7 @@ static int advection_y(
   const int ksize = domain->mysizes[2];
   const double dy = domain->dy;
   BEGIN
-    // uz is transported by uy | 9
+    // uz is transported by uy
     const double uy_l = + 0.5 * UY(i  , j  , k-1) + 0.5 * UY(i  , j  , k  );
     const double uy_u = + 0.5 * UY(i  , j+1, k-1) + 0.5 * UY(i  , j+1, k  );
     const double l = + 0.5 / dy * uy_l;
@@ -137,7 +136,7 @@ static int advection_z(
   const int ksize = domain->mysizes[2];
   const double dz = domain->dz;
   BEGIN
-    // uz is transported by uz | 9
+    // uz is transported by uz
     const double uz_l = + 0.5 * UZ(i  , j  , k-1) + 0.5 * UZ(i  , j  , k  );
     const double uz_u = + 0.5 * UZ(i  , j  , k  ) + 0.5 * UZ(i  , j  , k+1);
     const double l = + 0.5 / dz * uz_l;
@@ -162,7 +161,7 @@ static int diffusion_x(
   const int ksize = domain->mysizes[2];
   const laplacian_t * restrict lapx = laplacians.lapx;
   BEGIN
-    // uz is diffused in x | 5
+    // uz is diffused in x
     src[cnt] += diffusivity * (
         + LAPX(i)[0] * UZ(i-1, j  , k  )
         + LAPX(i)[1] * UZ(i  , j  , k  )
@@ -183,7 +182,7 @@ static int diffusion_y(
   const int ksize = domain->mysizes[2];
   const laplacian_t * restrict lapy = &laplacians.lapy;
   BEGIN
-    // uz is diffused in y | 5
+    // uz is diffused in y
     src[cnt] += diffusivity * (
         + (*lapy)[0] * UZ(i  , j-1, k  )
         + (*lapy)[1] * UZ(i  , j  , k  )
@@ -204,7 +203,7 @@ static int diffusion_z(
   const int ksize = domain->mysizes[2];
   const laplacian_t * restrict lapz = &laplacians.lapz;
   BEGIN
-    // uz is diffused in z | 5
+    // uz is diffused in z
     src[cnt] += diffusivity * (
         + (*lapz)[0] * UZ(i  , j  , k-1)
         + (*lapz)[1] * UZ(i  , j  , k  )
@@ -254,11 +253,11 @@ int compute_rhs_uz(
   double * restrict srca = fluid->srcuz[rk_a].data;
   double * restrict srcg = fluid->srcuz[rk_g].data;
   const double diffusivity = fluid->m_dif;
-  // advective contributions, always explicit | 3
+  // advective contributions, always explicit
   advection_x(domain, uz, ux, srca);
   advection_y(domain, uz, uy, srca);
   advection_z(domain, uz,     srca);
-  // diffusive contributions, can be explicit or implicit | 3
+  // diffusive contributions, can be explicit or implicit
   diffusion_x(domain, diffusivity, uz, param_m_implicit_x ? srcg : srca);
   diffusion_y(domain, diffusivity, uz, param_m_implicit_y ? srcg : srca);
   diffusion_z(domain, diffusivity, uz, param_m_implicit_z ? srcg : srca);
@@ -370,7 +369,7 @@ int update_uz(
       return 1;
     }
   }
-  // compute increments | 19
+  // compute increments
   {
     const double coef_a = rkcoefs[rkstep][rk_a];
     const double coef_b = rkcoefs[rkstep][rk_b];
@@ -390,7 +389,7 @@ int update_uz(
         + coef_g * dt * srcuzg[n];
     }
   }
-  // gamma dt diffusivity / 2 | 2
+  // gamma dt diffusivity / 2
   const double prefactor =
     0.5 * rkcoefs[rkstep][rk_g] * dt * fluid->m_dif;
   // solve linear systems in x
@@ -434,7 +433,7 @@ int update_uz(
         linear_system.x1pncl
     );
   }
-  // the field is actually updated here | 13
+  // the field is actually updated here
   {
     const int isize = domain->mysizes[0];
     const int jsize = domain->mysizes[1];
@@ -450,4 +449,3 @@ int update_uz(
   }
   return 0;
 }
-#endif

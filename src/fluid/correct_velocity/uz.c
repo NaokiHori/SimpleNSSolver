@@ -1,4 +1,3 @@
-#if NDIMS == 3
 #include "domain.h"
 #include "fluid.h"
 #include "fluid_solver.h"
@@ -27,7 +26,7 @@ int fluid_correct_velocity_uz(
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 1; i <= isize; i++){
-        // correct z velocity | 6
+        // correct z velocity
         const double psi_zm = PSI(i  , j  , k-1);
         const double psi_zp = PSI(i  , j  , k  );
         UZ(i, j, k) -= prefactor / dz * (
@@ -37,10 +36,9 @@ int fluid_correct_velocity_uz(
       }
     }
   }
-  // update boundary and halo cells | 3
+  // update boundary and halo cells
   if(0 != fluid_update_boundaries_uz(domain, &fluid->uz)){
     return 1;
   }
   return 0;
 }
-#endif

@@ -7,9 +7,7 @@
 #include "array_macros/domain/dxc.h"
 #include "array_macros/fluid/ux.h"
 #include "array_macros/fluid/uy.h"
-#if NDIMS == 3
 #include "array_macros/fluid/uz.h"
-#endif
 #include "array_macros/fluid/t.h"
 #include "internal.h"
 
@@ -34,33 +32,18 @@ int logging_check_energy(
   sdecomp.get_comm_cart(domain->info, &comm_cart);
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   const double * restrict dxf = domain->dxf;
   const double * restrict dxc = domain->dxc;
   const double dy = domain->dy;
-#if NDIMS == 3
   const double dz = domain->dz;
-#endif
   const double * restrict ux = fluid->ux.data;
   const double * restrict uy = fluid->uy.data;
-#if NDIMS == 3
   const double * restrict uz = fluid->uz.data;
-#endif
   const double * restrict t  = fluid->t.data;
   // velocity in each dimension and plus thermal energy
   double quantities[NDIMS + 1] = {0.};
-  // compute quadratic quantity in x direction | 19
-#if NDIMS == 2
-  for(int j = 1; j <= jsize; j++){
-    for(int i = 2; i <= isize; i++){
-      const double dx = DXC(i  );
-      const double cellsize = dx * dy;
-      quantities[0] += 0.5 * pow(UX(i, j), 2.) * cellsize;
-    }
-  }
-#else
+  // compute quadratic quantity in x direction
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 2; i <= isize; i++){
@@ -70,17 +53,7 @@ int logging_check_energy(
       }
     }
   }
-#endif
-  // compute quadratic quantity in y direction | 19
-#if NDIMS == 2
-  for(int j = 1; j <= jsize; j++){
-    for(int i = 1; i <= isize; i++){
-      const double dx = DXF(i  );
-      const double cellsize = dx * dy;
-      quantities[1] += 0.5 * pow(UY(i, j), 2.) * cellsize;
-    }
-  }
-#else
+  // compute quadratic quantity in y direction
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 1; i <= isize; i++){
@@ -90,9 +63,7 @@ int logging_check_energy(
       }
     }
   }
-#endif
-#if NDIMS == 3
-  // compute quadratic quantity in z direction | 9
+  // compute quadratic quantity in z direction
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 1; i <= isize; i++){
@@ -102,17 +73,7 @@ int logging_check_energy(
       }
     }
   }
-#endif
-  // compute thermal energy | 19
-#if NDIMS == 2
-  for(int j = 1; j <= jsize; j++){
-    for(int i = 1; i <= isize; i++){
-      const double dx = DXF(i  );
-      const double cellsize = dx * dy;
-      quantities[NDIMS] += 0.5 * pow(T(i, j), 2.) * cellsize;
-    }
-  }
-#else
+  // compute thermal energy
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 1; i <= isize; i++){
@@ -122,7 +83,6 @@ int logging_check_energy(
       }
     }
   }
-#endif
   const void * sendbuf = root == myrank ? MPI_IN_PLACE : quantities;
   void * recvbuf = quantities;
   MPI_Reduce(sendbuf, recvbuf, NDIMS + 1, MPI_DOUBLE, MPI_SUM, root, comm_cart);

@@ -3,7 +3,7 @@
 
 #include "sdecomp.h"
 
-// definition of a structure domain_t | 25
+// definition of a structure domain_t
 /**
  * @struct domain_t
  * @brief struct storing parameters relevant to spatial domain
@@ -25,9 +25,7 @@ typedef struct {
   double * restrict xf, * restrict xc;
   double * restrict dxf, * restrict dxc;
   double dy;
-#if NDIMS == 3
   double dz;
-#endif
 } domain_t;
 
 // constructor

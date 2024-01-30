@@ -34,18 +34,16 @@ int fluid_compute_rhs(
     fluid_t * fluid
 ){
   // reset buffers
-  // copy previous k-step source term and reset | 14
+  // copy previous k-step source term and reset
   if(0 != reset_srcs(fluid->srcux + rk_a, fluid->srcux + rk_b, fluid->srcux + rk_g)){
     return 1;
   }
   if(0 != reset_srcs(fluid->srcuy + rk_a, fluid->srcuy + rk_b, fluid->srcuy + rk_g)){
     return 1;
   }
-#if NDIMS == 3
   if(0 != reset_srcs(fluid->srcuz + rk_a, fluid->srcuz + rk_b, fluid->srcuz + rk_g)){
     return 1;
   }
-#endif
   if(0 != reset_srcs(fluid->srct  + rk_a, fluid->srct  + rk_b, fluid->srct  + rk_g)){
     return 1;
   }
@@ -56,11 +54,9 @@ int fluid_compute_rhs(
   if(0 != compute_rhs_uy(domain, fluid)){
     return 1;
   }
-#if NDIMS == 3
   if(0 != compute_rhs_uz(domain, fluid)){
     return 1;
   }
-#endif
   if(0 != compute_rhs_t (domain, fluid)){
     return 1;
   }

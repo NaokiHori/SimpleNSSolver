@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-// Runge-Kutta configurations | 9
+// Runge-Kutta configurations
 // indices
 extern const uint_fast8_t rk_a; // 0
 extern const uint_fast8_t rk_b; // 1

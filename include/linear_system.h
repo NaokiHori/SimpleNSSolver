@@ -26,25 +26,17 @@ typedef struct {
   bool implicit[NDIMS];
   double * restrict x1pncl;
   double * restrict y1pncl;
-#if NDIMS == 3
   double * restrict z2pncl;
-#endif
   size_t x1pncl_mysizes[NDIMS];
   size_t y1pncl_mysizes[NDIMS];
-#if NDIMS == 3
   size_t z2pncl_mysizes[NDIMS];
-#endif
   tdm_info_t * tdm_x;
   tdm_info_t * tdm_y;
-#if NDIMS == 3
   tdm_info_t * tdm_z;
-#endif
   sdecomp_transpose_plan_t * transposer_x1_to_y1;
   sdecomp_transpose_plan_t * transposer_y1_to_x1;
-#if NDIMS == 3
   sdecomp_transpose_plan_t * transposer_x1_to_z2;
   sdecomp_transpose_plan_t * transposer_z2_to_x1;
-#endif
 } linear_system_t;
 
 extern int linear_system_init(

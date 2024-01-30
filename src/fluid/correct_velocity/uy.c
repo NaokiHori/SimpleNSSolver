@@ -19,29 +19,14 @@ int fluid_correct_velocity_uy(
 ){
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   const double dy = domain->dy;
   const double * restrict psi = fluid->psi.data;
   double * restrict uy = fluid->uy.data;
-#if NDIMS == 2
-  for(int j = 1; j <= jsize; j++){
-    for(int i = 1; i <= isize; i++){
-      // correct y velocity | 6
-      const double psi_ym = PSI(i  , j-1);
-      const double psi_yp = PSI(i  , j  );
-      UY(i, j) -= prefactor / dy * (
-          + psi_yp
-          - psi_ym
-      );
-    }
-  }
-#else
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       for(int i = 1; i <= isize; i++){
-        // correct y velocity | 6
+        // correct y velocity
         const double psi_ym = PSI(i  , j-1, k  );
         const double psi_yp = PSI(i  , j  , k  );
         UY(i, j, k) -= prefactor / dy * (
@@ -51,8 +36,7 @@ int fluid_correct_velocity_uy(
       }
     }
   }
-#endif
-  // update boundary and halo cells | 3
+  // update boundary and halo cells
   if(0 != fluid_update_boundaries_uy(domain, &fluid->uy)){
     return 1;
   }
