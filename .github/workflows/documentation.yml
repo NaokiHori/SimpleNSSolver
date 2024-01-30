@@ -25,7 +25,9 @@ jobs:
           pip install requests numpy matplotlib
       - name: Download artifacts
         run: |
-          python .github/workflows/documentation_download_artifact.py ${{ secrets.GITHUB_TOKEN }}
+          python \
+            .github/workflows/documentation_download_artifact.py \
+            ${{ secrets.GITHUB_TOKEN }}
       - name: Draw figures
         run: |
           for fname in $(find docs/source -type f -name "draw_figure_*.py"); do
@@ -38,8 +40,8 @@ jobs:
             --volume ${PWD}:/project \
             --workdir /project \
             sphinxdoc/sphinx:latest \
-            sphinx-build -M linkcheck "docs/source" "docs/build"
-          log=docs/build/linkcheck/output.txt
+            sphinx-build -b linkcheck docs/source .
+          log=output.txt
           if [ -e ${log} ]; then
             wc -l ${log}
             cat ${log}
@@ -51,12 +53,12 @@ jobs:
             --volume ${PWD}:/project \
             --workdir /project \
             sphinxdoc/sphinx:latest \
-            sphinx-build -M html "docs/source" "docs/build"
+            sphinx-build -b html docs/source docs/build
       - name: Upload HTML artifacts
         uses: actions/upload-artifact@v3
         with:
           name: DocHTML
-          path: docs/build/html
+          path: docs/build
 
   deploy-doc:
     name: Deploy documentation
@@ -77,13 +79,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: DocHTML
-          path: docs/build/html
+          path: artifacts
       - name: Setup GitHub Pages
         uses: actions/configure-pages@main
       - name: Upload HTML
         uses: actions/upload-pages-artifact@main
         with:
-          path: docs/build/html
+          path: artifacts
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@main

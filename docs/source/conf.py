@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath("./conf_params"))
 
 project = "Simple NS Solver"
 author = "Naoki Hori"
-copyright = f"2019-2023, {author}"
+copyright = f"2019, {author}"
 
 extensions = [
         "myliteralinclude",

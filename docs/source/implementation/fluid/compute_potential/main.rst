@@ -23,8 +23,7 @@ The mathematical background is briefly described in the following pages:
    :maxdepth: 1
 
    math/governing_equation
-   math/eigen_decomposition
-   math/implementation
+   math/orthogonal_decomposition
 
 .. mydeclare:: /../../src/fluid/compute_potential/dft.c
    :language: c

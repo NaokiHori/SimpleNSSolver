@@ -55,5 +55,5 @@ while the periodicity is assumed in the :math:`y` direction:
 
 where :math:`n = 0, 1, 2, \cdots`.
 
-In :ref:`the next section <poisson_eigen_decomposition>`, the discretisation of this equation is described and discussed.
+In :ref:`the next section <poisson_orthogonal_decomposition>`, the discretisation of this equation is described and discussed.
 
