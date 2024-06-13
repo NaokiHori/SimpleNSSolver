@@ -14,8 +14,6 @@ Documentation
    introduction
    equations/main
    numerical_method/main
-   implementation/main
    examples/main
-   misc
    references
 

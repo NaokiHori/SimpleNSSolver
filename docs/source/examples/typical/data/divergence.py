@@ -14,7 +14,7 @@ def load(fname, xmin):
 
 if __name__ == "__main__":
     argv = sys.argv
-    assert(3 == len(argv))
+    assert 3 == len(argv)
     ifname = argv[1]
     ofname = argv[2]
     xmin = 200.

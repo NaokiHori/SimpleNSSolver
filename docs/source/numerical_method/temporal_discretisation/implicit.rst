@@ -1,244 +1,313 @@
 
-.. include:: /references.txt
-
 .. _implicit_treatment:
 
+.. include:: /references.txt
+
 ##################
-Implicit treatment
+Implicit Treatment
 ##################
 
-****************************
-Time scales and restrictions
-****************************
+**************************************
+Time Scales and Time-Step Restrictions
+**************************************
 
-Numerically, I should not allow any information to propagate longer distance than the grid size in one time step.
-To use a larger time step size :math:`\Delta t`, the information should be treated implicitly which is capable of capturing infinite propagation speed.
-There are following three time scales in the governing equations which are considered in this project, which give the corresponding three restrictions on the time step size :math:`\Delta t`.
+In the Navier-Stokes equations, there are advective, pressure-gradient, and diffusive terms, each with different time scales.
+Numerically, when a term is treated explicitly in time, information associated with it should not propagate a distance greater than the grid size in one time step.
+In other words, to allow the information to travel further, the term should be treated implicitly.
+Here, we elaborate on the three terms and their time scales to understand their effects on the overall time-marching process.
 
 #. Advective terms
 
-   One comes from the advective terms in the governing equations, where the information should not travel longer distance than the local grid size.
-   This constraint yields
+    By using the fluid velocity and the grid size as the reference velocity and length scales, we find that the advective terms impose a constraint:
 
-   .. math::
+    .. math::
 
-      \Delta t_{adv}
-      <
-      \Delta x / \ux,
+        &
+        \Delta t_{adv}
+        =
+        C
+        \frac{\sfact{i}}{\vel{i}},
 
-   where :math:`\Delta x` and :math:`\ux` are the local grid size and the velocity, respectively.
-   Note that, although written only in :math:`x` direction here, the same condition is applied to the other directions.
+        &
+        C
+        <
+        1,
 
-   I see that the time step size should be reduced as the resolution gets finer, and the refinement speed is proportional to the grid size:
+    where :math:`C` is a non-dimensional number known as the Courant number.
 
-   .. math::
+    Recall that the grid sizes are unity in the computational coordinate system, while the velocity is divided by the scale factor.
+    See :ref:`the equations in strong conservation forms <strong_conservation_form>`.
 
-      \Delta t_{adv}
-      =
-      C \Delta x,
-
-   where :math:`C` is called Courant number.
-
-   Since the advective terms are non-linear, it is impractical to treat them implicitly, and I cannot elimitate this constraint.
+    Due to advective effects, :math:`\Delta t` should be reduced as the resolution becomes finer, being proportional to the spatial resolution.
+    Since the advective terms are non-linear, treating them implicitly is not straightforward, thus this constraint is always present in this project.
 
 #. Diffusive terms
 
-   The other one is imposed by the diffusive terms in the governing equations, where the time scale yields
+    By adopting the diffusivities and the grid size as reference scales, we find that the diffusive terms impose another constraint:
 
-   .. math::
+    .. math::
 
-      & \Delta t_{dif, fluid}       \propto \frac{\sqrt{Ra}}{\sqrt{Pr}} \Delta x^2, \\
-      & \Delta t_{dif, temperature} \propto \sqrt{Pr} \sqrt{Ra}         \Delta x^2,
+        &
+        \Delta t_{dif}
+        =
+        F
+        \min
+        \left(
+            \frac{\sqrt{Ra}}{\sqrt{Pr}} ,
+            \sqrt{Pr} \sqrt{Ra}
+        \right)
+        \sfact{i}^2,
 
-   in non-dimensional form.
-   Note that the kinematic viscosity has the unit of :math:`\left[ L^2 T^{-1} \right]`, giving the characteristic time scale above.
+        &
+        F
+        <
+        1,
 
-   Now I see that the time step size should be reduced quadratically:
+    where :math:`F` is a non-dimensional number known as the Fourier number.
+    Note that the momentum and temperature fields have different diffusivities.
 
-   .. math::
+    As the spatial resolution is refined, :math:`\Delta t` should be reduced quadratically.
+    This criterion can make computational costs prohibitive, especially for wall-bounded turbulent flows where the wall-normal grid sizes must be extremely small close to the walls to resolve boundary layers.
 
-      \Delta t_{dif}
-      =
-      F \Delta x^2,
-
-   where :math:`F` is called Fourier number.
-
-   This criterion is often very severe and easily makes computations impractical, especially for wall-bounded turbulent flows where the wall-normal grid sizes should be extremely small close to the walls to resolve the boundary layers.
-
-   Since the diffusive terms are linear, this restriction can be eliminated by treating it implicitly, which is the central focus of this section.
+    Since the diffusive terms are linear, this restriction can be eliminated by treating them implicitly, as elaborated later on this page.
 
 #. Pressure-gradient terms
 
-   Incompressible liquids is the limited condition whose speed of sound is infinity.
-   To avoid :math:`\Delta t = 0`, the pressure field should always be treated implicitly.
+    Assuming the liquids are incompressible, i.e., the speed of sound is infinite, the pressure-gradient term must be treated implicitly.
+    See :ref:`the temporal integration of the momentum balance <momentum_integration>`.
 
-   .. seealso::
+********************************************
+Approximate Factorization of Diffusive Terms
+********************************************
 
-      In other words, for incompressible flows, the pressure field is determined to satisfy the incompressibility, which is the central idea of :ref:`the SMAC method <smac_method>`.
-
-*************************************************
-Approximate factorisation for the diffusive terms
-*************************************************
-
-To treat the diffusive terms implicitly, I need to solve the following N-dimensional Helmholtz equations:
+Here we focus on the implicit treatment of the diffusive terms.
+Applying :ref:`the combined scheme <time_marchers>` to :ref:`the momentum and internal energy balances <strong_conservation_form>` yields, for each Runge-Kutta sub-step:
 
 .. math::
 
-   \left( 1 - \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) u_i^{n+1}
-   =
-   -
-   \dder{p^n}{x_i} \Delta t
-   -
-   u_j^n \dder{u_i^n}{x_j} \Delta t
-   +
-   \left( 1 + \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) u_i^n
+    \vel{i}^{k+1}
+    -
+    \vel{i}^{k}
+    =
+    \gamma^k
+    \Delta t
+    \frac{\sqrt{Pr}}{\sqrt{Ra}}
+    \frac{1}{J}
+    \dif{}{\gcs{j}}
+    \left[
+        \frac{J}{\sfact{j}}
+        \frac{1}{\sfact{j}}
+        \dif{}{\gcs{j}}
+        \left\{
+            c
+            \vel{i}^{k+1}
+            +
+            \left( 1 - c \right)
+            \vel{i}^k
+        \right\}
+    \right]
+    +
+    \left(
+        \text{others}
+    \right)_i,
 
-for the momentum field, and
-
-.. math::
-
-   \left( 1 - \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) T^{n+1}
-   =
-   -
-   u_j^n \dder{T^n}{x_j} \Delta t
-   +
-   \left( 1 + \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) T^n
-
-for the temperature field.
-
-In this project, I can simplify these equations as follows.
-
-First, I re-write the equations as
-
-.. math::
-
-   \left( 1 - \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) \Delta u_i
-   =
-   -
-   \dder{p^n}{x_i} \Delta t
-   -
-   u_j^n \dder{u_i^n}{x_j} \Delta t
-   +
-   \Delta t \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} u_i^n,
+and
 
 .. math::
 
-   \left( 1 - \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) \Delta T
-   =
-   -
-   u_j^n \dder{T^n}{x_j} \Delta t
-   +
-   \Delta t \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} T^n,
+    T^{k+1}
+    -
+    T^{k}
+    =
+    \gamma^k
+    \Delta t
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+    \frac{1}{J}
+    \dif{}{\gcs{j}}
+    \left[
+        \frac{J}{\sfact{j}}
+        \frac{1}{\sfact{j}}
+        \dif{}{\gcs{j}}
+        \left\{
+            c
+            T^{k+1}
+            +
+            \left( 1 - c \right)
+            T^k
+        \right\}
+    \right]
+    +
+    \left(
+        \text{others}
+    \right),
+
+respectively, where :math:`c` is a coefficient specifying the implicit treatment:
+
+.. math::
+
+    c
+    =
+    \begin{cases}
+        \text{Euler explicit} & 0, \\
+        \text{Crank-Nicolson} & \frac{1}{2}, \\
+        \text{Euler implicit} & 1.
+    \end{cases}
+
+Here the last terms include the advective, pressure-gradient, and buoyancy terms which are not important here.
+Since they are almost identical, we only focus on the temperature relation, which yields a Helmholtz equation:
+
+.. math::
+
+    \left\{
+        1
+        -
+        c \gamma^k \Delta t
+        \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+        \frac{1}{J}
+        \dif{}{\gcs{j}}
+        \left(
+            \frac{J}{\sfact{j}}
+            \frac{1}{\sfact{j}}
+            \dif{}{\gcs{j}}
+        \right)
+    \right\}
+    T^{k+1}
+    =
+    \left\{
+        1
+        +
+        \left(
+            1
+            -
+            c
+        \right)
+        \gamma^k \Delta t
+        \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+        \frac{1}{J}
+        \dif{}{\gcs{j}}
+        \left(
+            \frac{J}{\sfact{j}}
+            \frac{1}{\sfact{j}}
+            \dif{}{\gcs{j}}
+        \right)
+    \right\}
+    T^{k}
+    +
+    \left(
+        \text{others}
+    \right).
+
+Although this equation can be solved in a similar way as :ref:`solving Poisson equations <poisson_equation>`, we simplify it by utilising the approximate factorisation (|DUKOWICZ1992|) as follows.
+
+First, we rewrite the equations as
+
+.. math::
+
+    \newcommand{\lap}[2]{
+        {#2} \gamma^k \Delta t
+        \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+        \frac{1}{J}
+        \dif{}{\gcs{#1}}
+        \left(
+            \frac{J}{\sfact{#1}}
+            \frac{1}{\sfact{#1}}
+            \dif{}{\gcs{#1}}
+        \right)
+    }
+    \left\{
+        1
+        -
+        \lap{j}{c}
+    \right\}
+    \Delta T
+    =
+    \lap{j}{}
+    T^k
+    +
+    \left(
+        \text{others}
+    \right),
 
 where
 
 .. math::
 
-   \Delta u_i
-   \equiv
-   u_i^{n+1}
-   -
-   u_i^{n  },
+    \Delta T
+    \equiv
+    T^{n+1}
+    -
+    T^{n  }.
+
+We approximate the left-hand side
 
 .. math::
 
-   \Delta T
-   \equiv
-   T^{n+1}
-   -
-   T^{n  }.
+    \left\{
+        1
+        -
+        \lap{1}{c}
+        -
+        \lap{2}{c}
+        -
+        \lap{3}{c}
+    \right\}
+    \Delta T
 
-Then I approximate the left-hand-side terms as
-
-.. math::
-
-   \left( 1 - \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) \Delta u_i
-   &
-   =
-   \left(
-      1
-      -
-      \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x} \dder{}{x}
-      -
-      \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{y} \dder{}{y}
-   \right) \Delta u_i \\
-   &
-   \approx
-   \left( 1 - \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x} \dder{}{x} \right)
-   \left( 1 - \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{y} \dder{}{y} \right)
-   \Delta u_i,
+as
 
 .. math::
 
-   \left( 1 - \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x_j} \dder{}{x_j} \right) \Delta T
-   &
-   =
-   \left(
-      1
-      -
-      \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x} \dder{}{x}
-      -
-      \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{y} \dder{}{y}
-   \right) \Delta T \\
-   &
-   \approx
-   \left( 1 - \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x} \dder{}{x} \right)
-   \left( 1 - \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{y} \dder{}{y} \right)
-   \Delta T.
+    \left\{
+        1
+        -
+        \lap{1}{c}
+    \right\}
+    \left\{
+        1
+        -
+        \lap{2}{c}
+    \right\}
+    \left\{
+        1
+        -
+        \lap{3}{c}
+    \right\}
+    \Delta T.
 
-By assuming
-
-.. math::
-
-   \Delta u_i
-   \sim
-   \Delta t,
-   \Delta T
-   \sim
-   \Delta t,
-
-I notice that the splitting errors
+The leading-order error induced by this approximation is
 
 .. math::
 
-   \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{x} \dder{}{x}
-   \times
-   \frac{\Delta t}{2} \frac{\sqrt{Pr}}{\sqrt{Ra}} \dder{}{y} \dder{}{y}
-   \times
-   \Delta u_i,
+    \lap{1}{c}
+    \Delta T
+    \times
+    \lap{2}{c}
+    \Delta T
+    =
+    \mathcal{O} \left( \Delta t^3 \right)
+
+by assuming
 
 .. math::
 
-   \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x} \dder{}{x}
-   \times
-   \frac{\Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{y} \dder{}{y}
-   \times
-   \Delta T,
+    \Delta T
+    \sim
+    \Delta t.
 
-are :math:`\sim \Delta t^3`, which is comparable to the dominant error of :ref:`the used Runge-Kutta scheme <time_marchers>`.
-
-In summary, the N-dimensional Helmholtz equations are approximated by the linear system for each direction and much easier to solve.
-This splitting method is called approximate factorisation (|DUKOWICZ1992|).
-Obviously this technique is not accepted if
-
-   * I solve the equation with respect to the variable itself (i.e. :math:`u_i` instead of :math:`\Delta u_i`)
-
-   * I use higher-order scheme to integrate the equation in time.
-
-Here, I need to solve :ref:`a linear system <linear_system>` to find :math:`\left( \cdots \right)^{-1}`.
-Since they are independent linear systems in each direction and I adopt the second-order-accurate central-difference scheme in space, I can solve them by :ref:`the tri-diagonal matrix algorithm <tdm>`.
+Since :math:`\mathcal{O} \left( \Delta t^3 \right)` is comparable to the dominant error of :ref:`the three-step explicit Runge-Kutta scheme <time_marchers>`, this treatment is justified.
+(Note that this is not accepted if we adopt a more accurate scheme to integrate the equation in time.)
+Note that we need to solve :ref:`a linear system <linear_system>` here.
 
 .. note::
 
-   * Overhead
+    * Overhead
 
-      In this project, the implicit treatment in the :math:`x` (wall-normal) direction can be easily achieved, whose cost is up to a few percent.
-      The implicit treatments in the other directions, however, require certain amount of MPI communication, whose overhead can be more than :math:`100` percent.
+        In this project, the implicit treatment in the :math:`x` (wall-normal) direction can be easily achieved, whose cost is up to a few percent.
+        The implicit treatments in the other directions, however, require certain amount of MPI communication, whose overhead can be more than :math:`100` percent.
 
-   * Monotonicity
+    * Monotonicity
 
-      Although the Crank-Nicolson scheme can eliminate the stability restriction, monotonicity (i.e. temperature is bounded between the two boundary values) is not guaranteed.
-      Unfortunately, in order to guarantee the monotonicity, :math:`\Delta t \propto \Delta x^2` should be satisfied again (see e.g. |HORVATH2000|).
-      Although this restriction disappears by adopting the Euler backward scheme (at the expense of the temporal accuracy), this fact is neglected in this project for now.
-      To minimises this issue, using a sufficiently fine spatial resolution to resolve the highest frequency is important.
+        Although the Crank-Nicolson scheme can eliminate the stability restriction, monotonicity (i.e., temperature is bounded between the two boundary values) is not guaranteed.
+        Unfortunately, to guarantee the monotonicity, :math:`\Delta t \propto \left( \sfact{i} \right)^2` should be satisfied (see e.g., |HORVATH2000|).
+        Although this restriction disappears by adopting the Euler implicit scheme (at the expense of the temporal accuracy), this issue is neglected in this project for now.
 

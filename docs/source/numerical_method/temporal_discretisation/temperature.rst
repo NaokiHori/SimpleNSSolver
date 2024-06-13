@@ -1,145 +1,172 @@
 
 .. _temperature_integration:
 
-####################################
-Integrating internal energy equation
-####################################
+.. include:: /references.txt
 
-The equation of the internal energy in non-dimensional form is
+#######################
+Internal Energy Balance
+#######################
 
-.. math::
-
-   \der{T}{t}
-   =
-   A
-   +
-   D,
-
-where I introduce some symbols for notational convenience:
+The equation of the internal energy is
 
 .. math::
 
-   A^k
-   \equiv
-   -
-   u_j^k \dder{T^k}{x_j},
+    \pder{T}{t}
+    =
+    A
+    +
+    D_x
+    +
+    D_y
+    +
+    D_z,
+
+where :math:`A` is the advective terms:
 
 .. math::
 
-   D^k
-   \equiv
-   \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x_j} \dder{T^k}{x_j}.
+    A
+    \equiv
+    -
+    \dtempadv{1}
+    -
+    \dtempadv{2}
+    -
+    \dtempadv{3},
 
-Here the spatial derivatives are approximated by proper finite-difference schemes discussed in :ref:`the other part <spatial_discretisation>`.
-
-**************
-Discretisation
-**************
-
-The temporal discretisation of the above equation leads to
+while :math:`D_i` is the diffusive term involving spatial differentiation in the :math:`i`-th direction:
 
 .. math::
 
-   &\text{do}\,\,\,\, k = 0, 2 \\
-   &\,\,\,\,
-   \Delta T
-   =
-   \alpha^k \Delta t \left( A^{k  } + D^{k  } \right)
-   +
-   \beta^k  \Delta t \left( A^{k-1} + D^{k-1} \right), \\
-   &\,\,\,\,
-   T^{k+1}
-   =
-   T^k
-   +
-   \Delta T. \\
-   &\text{enddo}
+    D_i
+    \equiv
+    \dtempdif{i}
+    \,\,
+    (\text{no summation over}\,i).
+
+See :ref:`the spatial discretization <discrete_internal_energy_balance>`.
+
+The temporal discretization for each Runge-Kutta iteration leads to
+
+.. math::
+
+    \Delta T
+    &
+    =
+    \alpha^k \Delta t \left( A^{k  } + D^{k  } \right)
+    +
+    \beta^k  \Delta t \left( A^{k-1} + D^{k-1} \right),
+
+    T^{k+1}
+    &
+    =
+    T^k
+    +
+    \Delta T,
 
 when all diffusive terms are treated explicitly, while
 
 .. math::
 
-   &\text{do}\,\,\,\, k = 0, 2 \\
-   &\,\,\,\,\Delta T
-   =
-   \alpha^k \Delta t A^{k  }
-   +
-   \beta^k  \Delta t A^{k-1}
-   +
-   \gamma^k \Delta t D^{k  }, \\
-   &\,\,\,\,T^{k+1}
-   =
-   T^k
-   +
-   \left(
-      1
-      -
-      \frac{\gamma^k \Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{y} \dder{}{y}
-   \right)^{-1}
-   \left(
-      1
-      -
-      \frac{\gamma^k \Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x} \dder{}{x}
-   \right)^{-1}
-   \Delta T, \\
-   &\text{enddo}
+    \newcommand{\lap}[2]{
+        {#2} \gamma^k \Delta t
+        \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+        \frac{1}{J}
+        \dif{}{\gcs{#1}}
+        \left(
+            \frac{J}{\sfact{#1}}
+            \frac{1}{\sfact{#1}}
+            \dif{}{\gcs{#1}}
+        \right)
+    }
+    \Delta T
+    &
+    =
+    \alpha^k \Delta t A^{k  }
+    +
+    \beta^k  \Delta t A^{k-1}
+    +
+    \gamma^k \Delta t D^{k  },
+
+    T^{k+1}
+    &
+    =
+    T^k
+    +
+    \left\{
+        1
+        -
+        \lap{3}{c}
+    \right\}^{-1}
+    \left\{
+        1
+        -
+        \lap{2}{c}
+    \right\}^{-1}
+    \left\{
+        1
+        -
+        \lap{1}{c}
+    \right\}^{-1}
+    \Delta T,
 
 when all diffusive terms are treated implicitly.
 
-Diffusive terms are sometimes partially treated implicitly.
-For example, when only the diffusive term in :math:`x` direction is implicitly treated, I have
+Diffusive terms are sometimes partially treated implicitly (c.f., |VANDERPOEL2015|).
+When only the diffusive term in :math:`x` direction is implicitly treated (the default configuration in this project), we have
 
 .. math::
 
-   &\text{do}\,\,\,\, k = 0, 2 \\
-   &\,\,\,\,\Delta T
-   =
-   \alpha^k \Delta t \left( A^{k  } + D_y^{k  } \right)
-   +
-   \beta^k  \Delta t \left( A^{k-1} + D_y^{k-1} \right)
-   +
-   \gamma^k \Delta t D_x^{k  }, \\
-   &\,\,\,\,T^{k+1}
-   =
-   T^k
-   +
-   \left(
-      1 - \frac{\gamma^k \Delta t}{2} \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x} \dder{}{x}
-   \right)^{-1}
-   \Delta T, \\
-   &\text{enddo}
+    \Delta T
+    &
+    =
+    \alpha^k \Delta t \left( A^{k  } + D_2^{k  } + D_3^{k  } \right)
+    +
+    \beta^k  \Delta t \left( A^{k-1} + D_2^{k-1} + D_3^{k-1} \right)
+    +
+    \gamma^k \Delta t D_1^{k  },
 
-where
+    T^{k+1}
+    &
+    =
+    T^k
+    +
+    \left\{
+        1
+        -
+        \lap{1}{c}
+    \right\}^{-1}
+    \Delta T.
 
-.. math::
+First, the explicit and implicit terms are calculated and stored to the corresponding buffers:
 
-   D_x^k
-   \equiv
-   \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{x} \dder{T^k}{x},
+.. myliteralinclude:: /../../src/fluid/predict/t.c
+    :language: c
+    :tag: compute right-hand-side terms, which are added to buffers
 
-.. math::
+The buffers are used to compute :math:`\Delta T`:
 
-   D_y^k
-   \equiv
-   \frac{1}{\sqrt{Pr} \sqrt{Ra}} \dder{}{y} \dder{T^k}{y}.
+.. myliteralinclude:: /../../src/fluid/predict/t.c
+    :language: c
+    :tag: compute increments
 
-.. seealso::
+When necessary, linear systems are solved to take care of the implicit treatments:
 
-   :ref:`Time-marching schemes <time_marchers>`.
+.. myliteralinclude:: /../../src/fluid/predict/t.c
+    :language: c
+    :tag: solve linear systems in x
 
-**************
-Implementation
-**************
+.. myliteralinclude:: /../../src/fluid/predict/t.c
+    :language: c
+    :tag: solve linear systems in y
 
-#. Compute right-hand-side terms
+.. myliteralinclude:: /../../src/fluid/predict/t.c
+    :language: c
+    :tag: solve linear systems in z
 
-   :ref:`fluid_compute_rhs <fluid_compute_rhs>`
+Finally the temperature field is updated:
 
-#. Compute :math:`\Delta T`
-
-   :ref:`fluid_predict_field <fluid_predict_field>`
-
-#. Solve linear systems and update temperature field
-
-   :ref:`fluid_predict_field <fluid_predict_field>`
+.. myliteralinclude:: /../../src/fluid/predict/t.c
+    :language: c
+    :tag: update temperature field
 

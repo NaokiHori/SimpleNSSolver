@@ -7,10 +7,6 @@ from matplotlib import pyplot
 def load(dname):
     glsizes = np.load(f"{dname}/glsizes.npy")
     is3d = True if 3 == len(glsizes) else False
-    if is3d:
-        ngrids = 1. * glsizes[1] * glsizes[2]
-    else:
-        ngrids = 1. * glsizes[1]
     num = np.load(f"{dname}/num.npy")
     xf  = np.load(f"{dname}/xf.npy")
     xc  = np.load(f"{dname}/xc.npy")
@@ -26,7 +22,7 @@ def load(dname):
         uz2 = None
     t1 = np.load(f"{dname}/t1.npy")
     t2 = np.load(f"{dname}/t2.npy")
-    return is3d, num * ngrids, xf, xc, ux1, ux2, uy1, uy2, uz1, uz2, t1, t2
+    return is3d, num, xf, xc, ux1, ux2, uy1, uy2, uz1, uz2, t1, t2
 
 def compute_rms(data1, data2):
     rms2 = data2 - np.power(data1, 2.)
@@ -57,12 +53,22 @@ if __name__ == "__main__":
     ux2 = compute_rms(ux1, ux2)
     uy2 = compute_rms(uy1, uy2)
     if is3d:
-        uz2   = compute_rms(uz1, uz2)
-    t2 = 0.5*(t2[:]+t2[::-1])
-    ux2   = 0.5*(ux2[:]+ux2[::-1])
-    uy2   = 0.5*(uy2[:]+uy2[::-1])
+        uz2 = compute_rms(uz1, uz2)
+    t2  = np.average(t2,  axis=0)
+    ux2 = np.average(ux2, axis=0)
+    uy2 = np.average(uy2, axis=0)
     if is3d:
-        uz2   = 0.5*(uz2[:]+uz2[::-1])
+        uz2 = np.average(uz2, axis=0)
+    if is3d:
+        t2  = np.average(t2,  axis=0)
+        ux2 = np.average(ux2, axis=0)
+        uy2 = np.average(uy2, axis=0)
+        uz2 = np.average(uz2, axis=0)
+    t2  = 0.5 *  t2[:] + 0.5 *  t2[::-1]
+    ux2 = 0.5 * ux2[:] + 0.5 * ux2[::-1]
+    uy2 = 0.5 * uy2[:] + 0.5 * uy2[::-1]
+    if is3d:
+        uz2 = 0.5 * uz2[:] + 0.5 * uz2[::-1]
     #
     xf  = trunc(xf)
     xc  = trunc(xc)

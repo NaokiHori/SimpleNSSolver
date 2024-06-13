@@ -1,13 +1,15 @@
-.. |AMSDEN1970|     replace:: Amsden and Harlow, *J. Comput. Phys.* (**6**), 1970
-.. |RAI1991|        replace:: Rai and Moin, *J. Comput. Phys.* (**96**), 1991
-.. |DUKOWICZ1992|   replace:: Dukowicz and Dvinsky, *J. Comput. Phys.* (**102**), 1992
-.. |VERZICCO1996|   replace:: Verzicco and Orlandi, *J. Comput. Phys.* (**123**), 1996
-.. |MORINISHI1998|  replace:: Morinishi et al., *J. Comput. Phys.* (**143**), 1998
-.. |KAJISHIMA1999|  replace:: Kajishima, Trans. *JSME* (**65-633, 1607**), 1999 (in Japanese)
-.. |HORVATH2000|    replace:: Horváth, *RANA* (**0015**), 2000
-.. |GROSSMANN2000|  replace:: Grossmann and Lohse, *J. Fluid Mech.* (**407**), 2000
-.. |HAM2002|        replace:: Ham et al., *J. Comput. Phys.* (**177**), 2002
-.. |VANDERPOEL2013| replace:: van der Poel et al., *J. Fluid Mech.* (**736**), 2013
-.. |COSTA2018|      replace:: Costa, *Comput. Math Appl.* (**76**), 2018
-.. |COPPOLA2019|    replace:: Coppola et al., *Appl. Mech. Rev.* (**71**), 2019
-.. |KOOLOTH2021|    replace:: Kooloth et al., *Phys. Rev. Fluids* (**6**), 2021
+.. |AMSDEN1970|        replace:: Amsden and Harlow, *J. Comput. Phys.* (**6**), 1970
+.. |RAI1991|           replace:: Rai and Moin, *J. Comput. Phys.* (**96**), 1991
+.. |DUKOWICZ1992|      replace:: Dukowicz and Dvinsky, *J. Comput. Phys.* (**102**), 1992
+.. |VERZICCO1996|      replace:: Verzicco and Orlandi, *J. Comput. Phys.* (**123**), 1996
+.. |MORINISHI1998|     replace:: Morinishi et al., *J. Comput. Phys.* (**143**), 1998
+.. |KAJISHIMA1999|     replace:: Kajishima, Trans. *JSME* (**65-633, 1607**), 1999 (in Japanese)
+.. |HORVATH2000|       replace:: Horváth, *RANA* (**0015**), 2000
+.. |HAM2002|           replace:: Ham et al., *J. Comput. Phys.* (**177**), 2002
+.. |VERSTAPPEN2003|    replace:: Verstappen and Veldman, *J. Comput. Phys.* (**187**), 2003
+.. |VANDERPOEL2013|    replace:: van der Poel et al., *J. Fluid Mech.* (**736**), 2013
+.. |VANDERPOEL2015|    replace:: van der Poel et al., *Comput. Fluids* (**116**), 2015
+.. |OSTILLAMONICO2015| replace:: Ostilla-Monico et al., *J. Comput. Phys* (**301**), 2015
+.. |KAJISHIMA2017|     replace:: Kajishima and Taira, Springer International Publishing, 2017
+.. |COSTA2018|         replace:: Costa, *Comput. Math Appl.* (**76**), 2018
+.. |COPPOLA2019|       replace:: Coppola et al., *Appl. Mech. Rev.* (**71**), 2019

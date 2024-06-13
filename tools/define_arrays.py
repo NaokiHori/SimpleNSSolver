@@ -127,7 +127,7 @@ def gen_1d(dname, vname, bounds):
     output(dname, vname, text)
 
 
-def gen_nd(dname, vname, bounds):
+def gen_nd(dname, vname, only_3d, bounds):
     # prepare macros for N-dimensional array
     lbound_0 = get_lbound(bounds[0][0])
     ubound_0 = get_ubound(bounds[0][1], "isize")
@@ -154,7 +154,7 @@ def gen_nd(dname, vname, bounds):
     )
     text = str()
     # 2D array (not for z-related things)
-    if "z" not in vname:
+    if not only_3d:
         text += (
             f"#if NDIMS == 2\n"
             f"// [{lbound_0} : {ubound_0}],"
@@ -192,39 +192,45 @@ def gen_nd(dname, vname, bounds):
 def domain(root):
     dname = f"{root}/domain"
     os.system(f"rm {dname}/*.h")
-    gen_1d(dname, "xf",     (+0, +1))
-    gen_1d(dname, "xc",     (+1, +1))
-    gen_1d(dname, "dxf",    (+0, +0))
-    gen_1d(dname, "dxc",    (+0, +1))
+    # wall-normal cell-face (xf) and center (xc) positions
+    gen_1d(dname, "xf",   (+0, +1))
+    gen_1d(dname, "xc",   (+1, +1))
+    # wall-normal scale factors at wall-normal faces and centers
+    gen_1d(dname, "hxxf", (+0, +1))
+    gen_1d(dname, "hxxc", (+0, +0))
+    # Jacobian determinants at wall-normal faces and centers
+    gen_1d(dname, "jdxf", (+0, +1))
+    gen_1d(dname, "jdxc", (+0, +0))
 
 
 def fluid(root):
     dname = f"{root}/fluid"
     os.system(f"rm {dname}/*.h")
-    gen_nd(dname, "ux",    ((+0, +1), (+1, +1), (+1, +1)))
-    gen_nd(dname, "uy",    ((+1, +1), (+1, +1), (+1, +1)))
-    gen_nd(dname, "uz",    ((+1, +1), (+1, +1), (+1, +1)))
-    gen_nd(dname, "p",     ((+1, +1), (+1, +1), (+1, +1)))
-    gen_nd(dname, "t",     ((+1, +1), (+1, +1), (+1, +1)))
-    gen_nd(dname, "psi",   ((+1, +1), (+1, +1), (+1, +1)))
-    gen_nd(dname, "srcux", ((-1, +0), (+0, +0), (+0, +0)))
-    gen_nd(dname, "srcuy", ((+0, +0), (+0, +0), (+0, +0)))
-    gen_nd(dname, "srcuz", ((+0, +0), (+0, +0), (+0, +0)))
-    gen_nd(dname, "srct",  ((+0, +0), (+0, +0), (+0, +0)))
+    gen_nd(dname, "ux",    False, ((+0, +1), (+1, +1), (+1, +1)))
+    gen_nd(dname, "uy",    False, ((+1, +1), (+1, +1), (+1, +1)))
+    gen_nd(dname, "uz",    True,  ((+1, +1), (+1, +1), (+1, +1)))
+    gen_nd(dname, "p",     False, ((+1, +1), (+1, +1), (+1, +1)))
+    gen_nd(dname, "t",     False, ((+1, +1), (+1, +1), (+1, +1)))
+    gen_nd(dname, "psi",   False, ((+1, +1), (+1, +1), (+1, +1)))
+    gen_nd(dname, "srcux", False, ((-1, +0), (+0, +0), (+0, +0)))
+    gen_nd(dname, "srcuy", False, ((+0, +0), (+0, +0), (+0, +0)))
+    gen_nd(dname, "srcuz", True,  ((+0, +0), (+0, +0), (+0, +0)))
+    gen_nd(dname, "srct",  False, ((+0, +0), (+0, +0), (+0, +0)))
 
 
 def statistics(root):
     dname = f"{root}/statistics"
     os.system(f"rm {dname}/*.h")
-    gen_nd(dname, "ux1", ((+0, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "ux2", ((+0, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "uy1", ((+1, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "uy2", ((+1, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "uz1", ((+1, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "uz2", ((+1, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "t1",  ((+1, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "t2",  ((+1, +1), (+0, +0), (+0, +0)))
-    gen_nd(dname, "uxt", ((+0, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "ux1", False, ((+0, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "ux2", False, ((+0, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "uy1", False, ((+1, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "uy2", False, ((+1, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "uz1", True,  ((+1, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "uz2", True,  ((+1, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "t1",  False, ((+1, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "t2",  False, ((+1, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "adv", False, ((+0, +1), (+0, +0), (+0, +0)))
+    gen_nd(dname, "dif", False, ((+0, +1), (+0, +0), (+0, +0)))
 
 
 if __name__ == "__main__":
@@ -235,3 +241,4 @@ if __name__ == "__main__":
     fluid(root)
     # arrays to store temporally-averaged statistics
     statistics(root)
+

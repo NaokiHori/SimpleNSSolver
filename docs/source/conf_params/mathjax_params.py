@@ -2,15 +2,38 @@ mathjax_path = "https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS
 
 macros = dict()
 
+# new symbols
+macros["gcs"]    = ["{\\xi^{#1}}", 1]
+macros["vel"]    = ["{u_{#1}}", 1]
+macros["gvel"]   = ["{u^{\\gcs{#1}}}", 1]
+macros["pder"]   = ["{\\frac{\\partial #1}{\\partial #2}}", 2]
+macros["sfact"]  = ["{h_{\\gcs{#1}}}", 1]
+macros["basis"]  = ["{\\vec{e}_{#1}}", 1]
+macros["gbasis"] = ["{\\vec{e}_{\\gcs{#1}}}", 1]
+macros["ave"]    = ["{\\overline{#1}^{#2}}", 2]
+macros["dif"]    = ["{\\delta_{#2} {#1}}", 2]
+macros["ngp"]    = ["{N_{#1}}", 1]
+macros["sumxf"]  = "{\\sum_{i = \\frac{1}{2}}^{\\ngp{1} + \\frac{1}{2}}}"
+macros["sumxc"]  = "{\\sum_{i = 1}^{\\ngp{1}}}"
+macros["sumyf"]  = "{\\sum_{j = \\frac{1}{2}}^{\\ngp{2} - \\frac{1}{2}}}"
+macros["sumyc"]  = "{\\sum_{j = 1}^{\\ngp{2}}}"
+macros["sumzf"]  = "{\\sum_{k = \\frac{1}{2}}^{\\ngp{3} - \\frac{1}{2}}}"
+macros["sumzc"]  = "{\\sum_{k = 1}^{\\ngp{3}}}"
+macros["heattransfer"] = "{\\mathcal{Q}}"
+
+macros["cmidx"] = ["{#1 - \\frac{1}{2}}", 1]
+macros["ccidx"] = ["{#1}", 1]
+macros["cpidx"] = ["{#1 + \\frac{1}{2}}", 1]
+
 # general coordinates
 macros["gx"] = "{\\xi}"
 macros["gy"] = "{\\eta}"
 macros["gz"] = "{\\zeta}"
 
 # velocity
-macros["ux"] = "{u_x}"
-macros["uy"] = "{u_y}"
-macros["uz"] = "{u_z}"
+macros["ux"] = "{\\vel{x}}"
+macros["uy"] = "{\\vel{y}}"
+macros["uz"] = "{\\vel{z}}"
 
 # cell centers
 macros["pimm"] = "i-1           "
@@ -94,12 +117,133 @@ macros["diffe"] = ["{\\delta_{#2} {#1}}", 2]
 # value at
 macros["vat"] = ["{\\left. {#1} \\right|_{#2}}", 2]
 
-# average
-macros["ave"] = ["{\\left\\langle {#1} \\right\\rangle_{#2}}", 2]
-
 # interpolations, arithmetic, volume, unknown
 macros["dintrpa"] = ["{\\overline {#1}^{\\left( A,#2 \\right)}}", 2]
 macros["dintrpv"] = ["{\\overline {#1}^{\\left( V,#2 \\right)}}", 2]
 macros["dintrpu"] = ["{\\overline {#1}^{\\left( U,#2 \\right)}}", 2]
+
+macros["ddiv"] = [
+        "\\frac{1}{J}"
+        "\\dif{}{\\gcs{#1}}"
+        "\\left("
+        "    \\frac{J}{\\sfact{#1}}"
+        "    \\vel{#1}"
+        "\\right)"
+        , 1
+]
+
+macros["dmomadv"] = [
+        "\\frac{1}{J}"
+        "\\ave{"
+        "  \\ave{"
+        "    \\frac{J}{\\sfact{#2}}"
+        "    \\vel{#2}"
+        "  }{\\gcs{#1}}"
+        "  \\dif{\\vel{#1}}{\\gcs{#2}}"
+        "}{\\gcs{#2}}"
+        , 2
+]
+macros["dmompre"] = [
+        "\\frac{1}{\\sfact{#1}}"
+        "\\dif{p}{\\gcs{#1}}"
+        , 1
+]
+macros["dmomdif"] = [
+        "\\frac{\\sqrt{Pr}}{\\sqrt{Ra}}"
+        "\\frac{1}{J}"
+        "\\dif{}{\\gcs{#1}}"
+        "\\left("
+        "  \\frac{J}{\\sfact{#1}}"
+        "  \\frac{1}{\\sfact{#1}}"
+        "  \\dif{\\vel{#2}}{\\gcs{#1}}"
+        "\\right)"
+        , 2
+]
+macros["dmombuo"] = "{\\ave{T}{\\gcs{1}}}"
+
+macros["dtempadv"] = [
+        "\\frac{1}{J}"
+        "\\ave{"
+        "  \\frac{J}{\\sfact{#1}}"
+        "  \\vel{#1}"
+        "  \\dif{T}{\\gcs{#1}}"
+        "}{\\gcs{#1}}"
+        , 1
+]
+macros["dtempdif"] = [
+        "\\frac{1}{\\sqrt{Pr} \\sqrt{Ra}}"
+        "\\frac{1}{J}"
+        "\\dif{}{\\gcs{#1}}"
+        "\\left("
+        "  \\frac{J}{\\sfact{#1}}"
+        "  \\frac{1}{\\sfact{#1}}"
+        "  \\dif{T}{\\gcs{#1}}"
+        "\\right)"
+        , 1
+]
+
+macros["dkdis"] = [
+        "\\frac{\\sqrt{Pr}}{\\sqrt{Ra}}"
+        "J"
+        "\\left("
+        "  \\frac{1}{\\sfact{#1}}"
+        "  \\dif{\\vel{#2}}{\\gcs{#1}}"
+        "\\right)^2"
+        , 2
+]
+
+macros["dhdis"] = [
+        "\\frac{1}{\\sqrt{Pr} \\sqrt{Ra}}"
+        "J"
+        "\\left("
+        "  \\frac{1}{\\sfact{#1}}"
+        "  \\dif{T}{\\gcs{#1}}"
+        "\\right)^2"
+        , 1
+]
+
+macros["dhinjall"] = [
+        "-"
+        "\\sumzc"
+        "\\sumyc"
+        "\\frac{1}{\\sqrt{Pr} \\sqrt{Ra}}"
+        "\\vat{"
+        "    \\left("
+        "        \\frac{J}{\\sfact{1}}"
+        "        T"
+        "        \\frac{1}{\\sfact{1}}"
+        "        \\dif{T}{\\gcs{1}}"
+        "    \\right)"
+        "}{\\frac{1}{2}}"
+        "+"
+        "\\sumzc"
+        "\\sumyc"
+        "\\frac{1}{\\sqrt{Pr} \\sqrt{Ra}}"
+        "\\vat{"
+        "    \\left("
+        "        \\frac{J}{\\sfact{1}}"
+        "        T"
+        "        \\frac{1}{\\sfact{1}}"
+        "        \\dif{T}{\\gcs{1}}"
+        "    \\right)"
+        "}{\\ngp{1} + \\frac{1}{2}}"
+]
+
+macros["dhdisall"] = [
+        "\\sumzc"
+        "\\sumyc"
+        "\\sumxf"
+        "\\dhdis{1}"
+        "+"
+        "\\sumzc"
+        "\\sumyf"
+        "\\sumxc"
+        "\\dhdis{2}"
+        "+"
+        "\\sumzf"
+        "\\sumyc"
+        "\\sumxc"
+        "\\dhdis{3}"
+]
 
 mathjax3_config = {"TeX": {"Macros": macros}}

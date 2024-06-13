@@ -5,29 +5,36 @@ import matplotlib
 matplotlib.use("Agg")
 from matplotlib import pyplot
 
+def get_ref_heat_transfer():
+    ly = os.environ.get("ly")
+    lz = os.environ.get("lz")
+    Ra = os.environ.get("Ra")
+    Pr = os.environ.get("Pr")
+    ly = float(ly)
+    lz = float(lz) if lz else 1.
+    Ra = float(Ra)
+    Pr = float(Pr)
+    return ly * lz / Ra**0.5 / Pr**0.5
+
 def load_and_process(dname):
-    coef    = np.load(f"{dname}/t_dif.npy")
-    xf      = np.load(f"{dname}/xf.npy")
-    xc      = np.load(f"{dname}/xc.npy")
-    num     = np.load(f"{dname}/num.npy")
-    t1      = np.load(f"{dname}/t1.npy")
-    uxt     = np.load(f"{dname}/uxt.npy")
-    glsizes = np.load(f"{dname}/glsizes.npy")
-    if 3 == len(glsizes):
-        ngrids = 1. * glsizes[1] * glsizes[2]
-    else:
-        ngrids = 1. * glsizes[1]
-    # divide by the number of grids in the homogeneous direction(s)
-    t1  /= ngrids
-    uxt /= ngrids
+    xf  = np.load(f"{dname}/xf.npy")
+    num = np.load(f"{dname}/num.npy")
+    adv = np.load(f"{dname}/adv.npy")
+    dif = np.load(f"{dname}/dif.npy")
+    is3d = 3 == len(adv.shape)
+    # normalise
+    adv /= get_ref_heat_transfer()
+    dif /= get_ref_heat_transfer()
     # divide by the number of samples
-    t1  /= num
-    uxt /= num
-    # adv
-    adv = 1. / coef * uxt
-    # dif
-    dif = -1. * np.diff(t1) / np.diff(xc)
-    # average [0:1/2] and [1/2:1]
+    adv /= num
+    dif /= num
+    # average in the homogeneous direction(s)
+    adv = np.sum(adv, axis=0)
+    dif = np.sum(dif, axis=0)
+    if is3d:
+        adv = np.sum(adv, axis=0)
+        dif = np.sum(dif, axis=0)
+    # average bottom-half and top-half
     nx = len(xf) // 2
     adv = 0.5 * adv + 0.5 * adv[::-1]
     dif = 0.5 * dif + 0.5 * dif[::-1]
@@ -35,7 +42,7 @@ def load_and_process(dname):
 
 if __name__ == "__main__":
     argv = sys.argv
-    assert(3 == len(argv))
+    assert 3 == len(argv)
     idname = argv[1]
     ofname = argv[2]
     x, adv, dif = load_and_process(idname)

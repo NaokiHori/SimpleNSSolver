@@ -1,17 +1,19 @@
 
+.. _temporal_discretization:
+
 .. include:: /references.txt
 
-.. _temporal_discretisation:
-
 #######################
-Temporal discretisation
+Temporal Discretization
 #######################
 
-In this section, I discuss how :ref:`the governing equations <governing_equations>` are integrated in time.
+In this section, we discuss how :ref:`the governing equations <governing_equations>` are integrated over time.
 
-To begin with, general remarks (the overall time marching schemes and the implicit treatment of the diffusive terms) are discussed.
-The treatment of the temperature field is presented in the first part as it is simpler.
-Special attention is needed for the conservation of the mass and the balance of the momentum, which is discussed in the second part.
+First, we briefly introduce several explicit and implicit schemes for integrating general ordinary differential equations over time.
+
+We then elaborate on the implicit treatment applied to the diffusive terms to avoid severe restrictions on time-step sizes.
+
+These fundamental techniques are first applied to the internal energy equation (evolution of temperature) due to its simplicity, and are then extended to the integration of the velocity field, where the momentum balance is integrated while keeping the incompressibility constraint.
 
 .. toctree::
    :maxdepth: 1
@@ -19,5 +21,5 @@ Special attention is needed for the conservation of the mass and the balance of 
    time_marcher
    implicit
    temperature
-   smac_method
+   momentum
 

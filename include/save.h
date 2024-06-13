@@ -10,11 +10,12 @@ typedef struct save_t_ {
     const domain_t * domain,
     const double time
   );
-  // make space to save flow fields, save some scalars
-  int (* const prepare)(
+  // save a instantaneous flow field to files
+  int (* const output)(
       const domain_t * domain,
-      const int step,
-      char ** dirname
+      const size_t step,
+      const double time,
+      const fluid_t * fluid
   );
   // getter, next timing to call "output"
   double (* const get_next_time)(

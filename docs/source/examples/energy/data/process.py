@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use("Agg")
 from matplotlib import pyplot
 
-def load(dname, is3d):
+def load(dname):
     fnames = [f"{dname}/{fname}" for fname in os.listdir(dname) if fname.startswith("energy") and fname.endswith(".dat")]
     fnames = sorted(fnames)
     ls  = list()
@@ -14,6 +14,7 @@ def load(dname, is3d):
     y2s = list()
     for fname in fnames:
         data = np.loadtxt(fname)
+        is3d = 5 == len(data[0])
         t  = data[:, 0]
         if is3d:
             kx = data[:, 1]
@@ -37,23 +38,17 @@ def load(dname, is3d):
     return ls, xs, y1s, y2s
 
 if __name__ == "__main__":
-    np.random.seed(seed=16384)
     argv = sys.argv
-    assert(4 == len(argv))
+    assert 4 == len(argv)
     idname  = argv[1]
     ofname1 = argv[2]
     ofname2 = argv[3]
-    is3d = "3d" in ofname1
-    ls, xs, y1s, y2s = load(idname, is3d)
+    ls, xs, y1s, y2s = load(idname)
+    colors = pyplot.rcParams["axes.prop_cycle"].by_key()["color"]
     #
     fig = pyplot.figure()
     ax = fig.add_subplot(111)
-    for l, x, y1, y2 in zip(ls, xs, y1s, y2s):
-        color = "#{:02X}{:02X}{:02X}".format(
-                np.random.randint(low=0, high=255),
-                np.random.randint(low=0, high=255),
-                np.random.randint(low=0, high=255),
-        )
+    for l, x, y1, y2, color in zip(ls, xs, y1s, y2s, colors):
         ax.plot(x, -y1, color=color, linestyle="-",  label=l)
         ax.plot(x, -y2, color=color, linestyle="--")
     kwrds = {

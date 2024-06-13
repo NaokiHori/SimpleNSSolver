@@ -2,66 +2,75 @@
 .. _domain_setup:
 
 ############
-Domain setup
+Domain Setup
 ############
 
+.. include:: /references.txt
+
 .. note::
 
-   For simplicity I neglect the :math:`z` direction in this page.
-   Note that the same condition applies as for the :math:`y` direction.
+    For simplicity, we omit the :math:`z` direction on this page.
+    Practically, it is treated in the same manner as the :math:`y` direction.
 
 ***************************************
-Staggered grid and domain decomposition
+Staggered Grid and Domain Decomposition
 ***************************************
 
-In this project, I use the staggered grid arrangement, i.e. the pressure and all velocity components are defined at different locations:
+In this project, we utilize the staggered grid arrangement, i.e., all velocity components, pressure, and temperature are defined at different locations:
 
 .. image:: images/staggered1.png
-   :width: 800
+    :width: 800
+    :align: center
 
-where the left figure shows the locations and indices of the variables whose notations are used in the equations, while the descriptions found in the right figure are used in the code.
+Here the left panel shows the locations and indices of the variables in the equations, while the right schematic describes notations used in the code.
 
-In the current project, I assume that the domain is wall-bounded in the :math:`x` direction, while periodic boundary conditions are imposed in the :math:`y` direction.
-The spatial resolution is defined in terms of the number of cell centers (where the pressure and the temperature are defined): ``glisize = domain->glsizes[0]`` and ``gljsize = domain->glsizes[1]`` in the :math:`x` and the :math:`y` directions, respectively.
-Here the prefix **gl** is used to emphasise they are **global** sizes.
+We assume that the domain is wall-bounded in the :math:`x` direction, while periodic boundary conditions are imposed in the other directions.
+The spatial resolution denotes the number of cell centers (where pressure and temperature are defined): e.g., ``glisize = domain->glsizes[0]`` and ``gljsize = domain->glsizes[1]`` in the :math:`x` and :math:`y` directions, respectively.
 
-This library supports the process parallelisation (in particular by means of ``MPI``), which is achieved by splitting the whole domain into smaller blocks, and each process is responsible for ``myisize = domain->mysizes[0]`` times ``myjsize = domain->mysizes[1]`` cell centers:
+Note that the prefix **gl** is used to emphasize they are **global**.
+This library supports process parallelization (in particular by means of ``Message Passing Interface: MPI``), splitting the whole domain into smaller blocks, and each process is only responsible for ``myisize x myjsize = domain->mysizes[0] x domain->mysizes[1]`` cell centers:
 
 .. image:: images/domain.png
-   :width: 800
+    :width: 800
+    :align: center
 
 .. note::
 
-   * No decomposition in the :math:`x` direction
+    * No decomposition in the wall-normal direction
 
-      In this project, the wall-normal direction is not decomposed (so-called `pencil decomposition <https://github.com/NaokiHori/SimpleDecomp>`_ is adopted).
-      Thus ``glisize = glsizes[0]`` and ``myisize = mysizes[0]`` are equal.
+        In this project, the wall-normal direction is not decomposed, and we adopt the so-called `pencil decomposition <https://github.com/NaokiHori/SimpleDecomp>`_.
+        Thus ``glisize = glsizes[0]`` and ``myisize = mysizes[0]`` are equal.
 
-   * Pencil sizes can be different
+    * Pencil sizes can be different
 
-      Although the domain is decomposed so that each process has a similar workload, ``myjsize`` can be different for each process, epsecially when the domain size is not divisible by the number of processes in the direction.
+        Although domains are decomposed such that each process has a similar workload, ``myjsize`` can be different for each process, especially when the domain size is not divisible by the number of processes in that direction.
 
-In each process, each variable is positioned as follows:
+For each process, variables are positioned as follows:
 
 * ``UX(i, j)``
 
-   .. image:: images/staggered2.png
-      :width: 600
+    .. image:: images/staggered2.png
+        :width: 600
+        :align: center
 
 * ``UY(i, j)``
 
-   .. image:: images/staggered3.png
-      :width: 600
+    .. image:: images/staggered3.png
+        :width: 600
+        :align: center
 
 * ``P(i, j)`` and ``T(i, j)``
 
-   .. image:: images/staggered4.png
-      :width: 600
+    .. image:: images/staggered4.png
+        :width: 600
+        :align: center
 
-Sizes of the two-dimensional arrays are summarised as follows:
+Notice the boundary treatments, where :math:`u_y, p, T` are exceptionally positioned to directly impose the wall boundary conditions.
+
+Sizes of the two-dimensional arrays are as follows:
 
 ============ =============== ===============
-Name         ``i`` range     ``j`` range
+Variable     ``i`` range     ``j`` range
 ============ =============== ===============
 ``UX``       ``1:myisize+1`` ``0:myjsize+1``
 ``UY``       ``0:myisize+1`` ``0:myjsize+1``
@@ -70,98 +79,52 @@ Name         ``i`` range     ``j`` range
 
 .. note::
 
-   * Cell-face positions and cell-center positions
+    * Cell-face positions and cell-center positions
 
-      Although two different positions are adopted, only the cell faces are the free parameter since the cell centers are assumed to be positioned in the middle of the neighbouring cell faces.
+        Cell centers are positioned in the middle of the two neighboring cell faces.
 
-   * Halo cells
+    * Halo cells
 
-      In order to evaluate the differentiations in the :math:`y` direction close to the domain edges, additional cells (halo cells) are attached in the :math:`y` boundaries.
+        To evaluate differentiations in the homogeneous directions at the domain boundaries, additional cells (halo cells) are appended in the :math:`y, z` directions.
 
-   * Boundary points
+***************************
+Uniform and Stretched Grids
+***************************
 
-      ``UY(0, j)``, ``UY(glisize+1, j)`` are shifted towards the near wall locations so that I can impose the velocity boundary conditions directly.
-      Same holds for the temperature and the pressure.
-
-      Another way is to locate a cell inside one wall, whose values are extrapolated from the interior values (ghost cells).
-      It is easy to confirm that this extrapolation and the current implementation are identical.
-
-*****************************************
-Uniform and stretched grid configurations
-*****************************************
-
-In the :math:`y` direction, distance between two neighbouring points should be equal.
-In the :math:`x` direction, non-uniform grid arrangement can be adopted, which could be useful to resolve boundary layers close to the walls.
-To identify the positions, it is necessary to use two variables which are in ``domain`` structure, whose definitions are described below.
+In the homogeneous directions, the distance between two neighboring points should be equal.
+In the wall-normal direction, a non-uniform grid arrangement can be used, which could be beneficial to resolve boundary layers close to the walls (c.f., |VANDERPOEL2015|).
+To identify this, two variables are defined in the ``domain`` structure.
 
 #. Cell-face positions ``domain->xf``
 
-   ``XF(i)`` is used to describe the position of the cell faces in :math:`x` direction (**f** comes from face), i.e. the locations where :math:`\ux` is defined.
+    ``XF(i)`` is used to locate the wall-normal cell faces (**f** denotes face), i.e., where :math:`\ux` are defined.
 
-   .. note::
-
-      This should be given as the initial condition.
-
-   .. image:: images/grid1.png
-      :width: 800
+    .. image:: images/grid1.png
+        :width: 800
+        :align: center
 
 #. Cell-center positions ``domain->xc``
 
-   ``XC(i)`` is used to describe the position of the cell centers in :math:`x` direction (**c** comes from center), i.e. the locations where :math:`p`, :math:`T`, and :math:`\uy` are defined.
+    ``XC(i)`` is used to locate the wall-normal cell centers (**c** denotes center), i.e., where :math:`p`, :math:`T`, and :math:`\uy` are defined.
 
-   Note again that the first and the last points are defined at cell-faces.
-   Except these two points, the following relation gives the relation between the cell faces and the center:
+    Note again that the first and the last points are exceptionally positioned at the boundaries.
+    In the bulk, the following relation holds:
 
-   .. math::
+    .. math::
 
-      XC \left( i \right)
-      =
-      \frac{1}{2} XF \left( i     \right)
-      +
-      \frac{1}{2} XF \left( i + 1 \right).
+        XC \left( i \right)
+        =
+        \frac{1}{2} XF \left( i     \right)
+        +
+        \frac{1}{2} XF \left( i + 1 \right),
 
-   .. image:: images/grid2.png
-      :width: 800
+    i.e., the cell center is in the middle of the two neighboring cell faces.
 
-   .. note::
+    .. image:: images/grid2.png
+        :width: 800
+        :align: center
 
-      Although this is not a free parameter, this should also be given as the initial condition as well as ``xf``.
+.. note::
 
-#. Cell-face distance ``domain->dxf``
-
-   ``DXF(i)`` is used to describe the distance between two neighbouring cell faces:
-
-   .. math::
-
-      DXF \left( i \right)
-      =
-      XF \left( i + 1 \right)
-      -
-      XF \left( i     \right).
-
-   .. image:: images/grid3.png
-      :width: 800
-
-   .. note::
-
-      This is computed in :ref:`src/domain/init.c <domain>`.
-
-#. Cell-center distance ``domain->dxc``
-
-   ``DXC(i)`` is used to describe the distance between two neighbouring cell centers:
-
-   .. math::
-
-      DXC \left( i \right)
-      =
-      XC \left( i     \right)
-      -
-      XC \left( i - 1 \right).
-
-   .. image:: images/grid4.png
-      :width: 800
-
-   .. note::
-
-      This is computed in :ref:`src/domain/init.c <domain>`.
+    The cell-face and cell-center positions should be given along with a flow field to launch the simulator.
 

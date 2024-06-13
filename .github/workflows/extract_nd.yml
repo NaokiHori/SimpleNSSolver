@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - src/**
+      - include/**
+  workflow_dispatch:
 
 jobs:
 
@@ -45,11 +49,6 @@ jobs:
           git switch -c ${{ matrix.dimension }}d
           git config --local user.email "36466440+NaokiHori@users.noreply.github.com"
           git config --local user.name "NaokiHori"
-          # let IC generator of the given dimension as main.py
-          cd initial_condition
-          find . -type f -name "*d.py" | grep -v ${{ matrix.dimension }}d.py | xargs git rm
-          git mv ${{ matrix.dimension }}d.py main.py
-          cd ..
           # add, commit, and push
           git add Makefile
           git add src

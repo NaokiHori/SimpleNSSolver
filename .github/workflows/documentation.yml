@@ -3,65 +3,15 @@ name: Documentation
 on:
 
   workflow_run:
-    workflows: [CI]
+    workflows: [ExtractND]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
 
-  build-doc:
-    name: Build documentation
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@main
-        with:
-          repository: "NaokiHori/SimpleNSSolver"
-          ref: "main"
-      - name: Install python dependencies for post-processings
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests numpy matplotlib
-      - name: Download artifacts
-        run: |
-          python \
-            .github/workflows/documentation_download_artifact.py \
-            ${{ secrets.GITHUB_TOKEN }}
-      - name: Draw figures
-        run: |
-          for fname in $(find docs/source -type f -name "draw_figure_*.py"); do
-            python ${fname};
-          done
-      - name: Check dead links
-        run: |
-          docker run \
-            --rm \
-            --volume ${PWD}:/project \
-            --workdir /project \
-            sphinxdoc/sphinx:latest \
-            sphinx-build -b linkcheck docs/source .
-          log=output.txt
-          if [ -e ${log} ]; then
-            wc -l ${log}
-            cat ${log}
-          fi
-      - name: Build documentation using Sphinx
-        run: |
-          docker run \
-            --rm \
-            --volume ${PWD}:/project \
-            --workdir /project \
-            sphinxdoc/sphinx:latest \
-            sphinx-build -b html docs/source docs/build
-      - name: Upload HTML artifacts
-        uses: actions/upload-artifact@main
-        with:
-          name: DocHTML
-          path: docs/build
-
-  deploy-doc:
-    name: Deploy documentation
+  build-and-deploy-doc:
+    name: Build and deploy documentation
     permissions:
       contents: read
       pages: write
@@ -73,19 +23,25 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: [build-doc]
     steps:
-      - name: Download HTML artifacts
-        uses: actions/download-artifact@main
+      - name: Checkout repository
+        uses: actions/checkout@main
         with:
-          name: DocHTML
-          path: artifacts
+          ref: ${{ github.ref_name }}
+      - name: Build documentation using Sphinx
+        run: |
+          docker run \
+            --rm \
+            --volume ${PWD}:/project \
+            --workdir /project \
+            sphinxdoc/sphinx:latest \
+            sphinx-build docs/source docs/build
       - name: Setup GitHub Pages
         uses: actions/configure-pages@main
       - name: Upload HTML
         uses: actions/upload-pages-artifact@main
         with:
-          path: artifacts
+          path: docs/build
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@main

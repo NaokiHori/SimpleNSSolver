@@ -3,14 +3,18 @@
 set -x
 set -e
 
+lx=1.0e+0
+ly=2.0e+0
+Ra=1.0e+8
+Pr=1.0e+1
+
 # set initial condition
 cd initial_condition
 make output
-lx=1.0e+0 \
-ly=2.0e+0 \
+lx=${lx} \
+ly=${ly} \
 glisize=128 \
 gljsize=256 \
-uniformx=false \
 python main.py output
 cd ..
 
@@ -25,33 +29,53 @@ stat_rate=1.0e-1 \
 stat_after=2.0e+2 \
 coef_dt_adv=0.95 \
 coef_dt_dif=0.95 \
-Ra=1.0e+8 \
-Pr=1.0e+1 \
+Ra=${Ra} \
+Pr=${Pr} \
 mpirun -n 2 --oversubscribe ./a.out initial_condition/output
 
 # post process
 mkdir artifacts
+
+# visualise
 python \
   docs/source/examples/typical/data/snapshot_2d.py \
   $(find output/save -type d | sort | tail -n 1) \
-  artifacts/snapshot_2d.png
+  artifacts/snapshot.png
+
+# divergence-t plot
 python \
   docs/source/examples/typical/data/divergence.py \
-  output/log/divergence.dat \
-  artifacts/divergence_2d.png
+  output/log/max_divergence.dat \
+  artifacts/divergence.png
+
+# Nu-t plot
+ly=${ly} \
+Ra=${Ra} \
+Pr=${Pr} \
 python \
   docs/source/examples/typical/data/nusselt_time.py \
-  output/log/nusselt.dat \
-  artifacts/nusselt_time_2d.png
+  output/log/heat_transfer.dat \
+  output/log/injected_squared_velocity.dat \
+  output/log/dissipated_squared_velocity.dat \
+  output/log/dissipated_squared_temperature.dat \
+  artifacts/nusselt_time.png
+
+# Nu-x plot
+ly=${ly} \
+Ra=${Ra} \
+Pr=${Pr} \
 python \
   docs/source/examples/typical/data/nusselt_x.py \
   $(find output/stat -type d | sort | tail -n 1) \
-  artifacts/nusselt_x_2d.png
+  artifacts/nusselt_x.png
+
+# standard deviations in x
 python \
   docs/source/examples/typical/data/std.py \
   $(find output/stat -type d | sort | tail -n 1) \
-  artifacts/std_2d.png
-echo "OS   :" $(cat /etc/os-release | grep PRETTY_NAME | awk -F "=" '{print $2}') >> artifacts/ci_2d.txt
-echo "Date :" $(date) >> artifacts/ci_2d.txt
-echo "Hash :" $(git rev-parse HEAD) >> artifacts/ci_2d.txt
+  artifacts/std.png
+
+echo "OS   :" $(cat /etc/os-release | grep PRETTY_NAME | awk -F "=" '{print $2}') >> artifacts/ci.txt
+echo "Date :" $(date) >> artifacts/ci.txt
+echo "Hash :" $(git rev-parse HEAD) >> artifacts/ci.txt
 

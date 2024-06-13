@@ -18,16 +18,7 @@ int integrate(
   // Runge-Kutta iterations
   // max iteration, should be three
   for(size_t rkstep = 0; rkstep < RKSTEPMAX; rkstep++){
-    // predict flow field | 14
-    // compute right-hand-side terms of RK scheme
-    if(0 != fluid_compute_rhs(domain, fluid)){
-      return 1;
-    }
-    // couple external factors, by default buoyancy force
-    if(0 != fluid_couple_external_force(domain, fluid)){
-      return 1;
-    }
-    // update flow field
+    // predict flow field | 5
     // NOTE: while the temperature is fully updated here,
     //   the velocity field is still non-solenoidal
     if(0 != fluid_predict_field(domain, rkstep, *dt, fluid)){

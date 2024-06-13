@@ -26,7 +26,7 @@
     /* divide the first row by center-diagonal term | 2 */ \
     v[0] = u[0] / c[0]; \
     q[0] = q[0] / c[0]; \
-    /* forward substitution | 7 */ \
+    /* forward sweep | 7 */ \
     for(int i = 1; i < n - 1; i++){ \
       /* assume positive-definite system */ \
       /*   to skip zero-division checks */ \

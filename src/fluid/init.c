@@ -1,5 +1,6 @@
 #include <math.h>
 #include "param.h"
+#include "runge_kutta.h"
 #include "memory.h"
 #include "config.h"
 #include "domain.h"
@@ -21,52 +22,44 @@
 #endif
 #include "array_macros/fluid/srct.h"
 
-/**
- * @brief allocate members
- * @param[in]  domain : information about domain decomposition and size
- * @param[out] fluid  : structure storing flow fields and auxiliary buffers
- * @return            : error code
- */
-static int allocate(
+static int allocate (
     const domain_t * domain,
     fluid_t * fluid
-){
+) {
   // velocity
-  if(0 != array.prepare(domain, UX_NADDS, sizeof(double), &fluid->ux )) return 1;
-  if(0 != array.prepare(domain, UY_NADDS, sizeof(double), &fluid->uy )) return 1;
+  if (0 != array.create(domain, UX_NADDS, sizeof(double), &fluid->ux )) return 1;
+  if (0 != array.create(domain, UY_NADDS, sizeof(double), &fluid->uy )) return 1;
 #if NDIMS == 3
-  if(0 != array.prepare(domain, UZ_NADDS, sizeof(double), &fluid->uz )) return 1;
+  if (0 != array.create(domain, UZ_NADDS, sizeof(double), &fluid->uz )) return 1;
 #endif
   // pressure and scalar potential
-  if(0 != array.prepare(domain, P_NADDS,   sizeof(double), &fluid->p  )) return 1;
-  if(0 != array.prepare(domain, PSI_NADDS, sizeof(double), &fluid->psi)) return 1;
+  if (0 != array.create(domain, P_NADDS,   sizeof(double), &fluid->p  )) return 1;
+  if (0 != array.create(domain, PSI_NADDS, sizeof(double), &fluid->psi)) return 1;
   // temperature
-  if(0 != array.prepare(domain, T_NADDS, sizeof(double), &fluid->t)) return 1;
+  if (0 != array.create(domain, T_NADDS, sizeof(double), &fluid->t)) return 1;
   // Runge-Kutta source terms
-  for(size_t n = 0; n < 3; n++){
-    if(0 != array.prepare(domain, SRCUX_NADDS, sizeof(double), &fluid->srcux[n])) return 1;
-    if(0 != array.prepare(domain, SRCUY_NADDS, sizeof(double), &fluid->srcuy[n])) return 1;
+  for (size_t n = 0; n < RKNBUFFERS; n++) {
+    if (0 != array.create(domain, SRCUX_NADDS, sizeof(double), fluid->srcux + n)) return 1;
+    if (0 != array.create(domain, SRCUY_NADDS, sizeof(double), fluid->srcuy + n)) return 1;
 #if NDIMS == 3
-    if(0 != array.prepare(domain, SRCUZ_NADDS, sizeof(double), &fluid->srcuz[n])) return 1;
+    if (0 != array.create(domain, SRCUZ_NADDS, sizeof(double), fluid->srcuz + n)) return 1;
 #endif
-    if(0 != array.prepare(domain, SRCT_NADDS,  sizeof(double), &fluid->srct [n])) return 1;
+    if (0 != array.create(domain, SRCT_NADDS,  sizeof(double), fluid->srct  + n)) return 1;
   }
   return 0;
 }
 
-static void report(
+static int report (
     const sdecomp_info_t * info,
     const fluid_t * fluid
-){
+) {
   const int root = 0;
   int myrank = root;
   sdecomp.get_comm_rank(info, &myrank);
-  if(root == myrank){
+  if (root == myrank) {
     printf("FLUID\n");
     printf("\tRa: % .7e\n", fluid->Ra);
     printf("\tPr: % .7e\n", fluid->Pr);
-    printf("\tMomentum    diffusivity: % .7e\n", fluid->m_dif);
-    printf("\tTemperature diffusivity: % .7e\n", fluid->t_dif);
     printf("\tdiffusive treatment in x: %s\n", param_m_implicit_x ? "implicit" : "explicit");
     printf("\tdiffusive treatment in y: %s\n", param_m_implicit_y ? "implicit" : "explicit");
 #if NDIMS == 3
@@ -74,6 +67,7 @@ static void report(
 #endif
     fflush(stdout);
   }
+  return 0;
 }
 
 /**
@@ -88,30 +82,28 @@ int fluid_init(
     const char dirname_ic[],
     const domain_t * domain,
     fluid_t * fluid
-){
+) {
   // allocate arrays | 1
-  if(0 != allocate(domain, fluid)) return 1;
+  if (0 != allocate(domain, fluid)) return 1;
   // load flow fields | 7
-  if(0 != array.load(domain, dirname_ic, "ux", fileio.npy_double, &fluid->ux)) return 1;
-  if(0 != array.load(domain, dirname_ic, "uy", fileio.npy_double, &fluid->uy)) return 1;
+  if (0 != array.load(domain, dirname_ic, "ux", fileio.npy_double, &fluid->ux)) return 1;
+  if (0 != array.load(domain, dirname_ic, "uy", fileio.npy_double, &fluid->uy)) return 1;
 #if NDIMS == 3
-  if(0 != array.load(domain, dirname_ic, "uz", fileio.npy_double, &fluid->uz)) return 1;
+  if (0 != array.load(domain, dirname_ic, "uz", fileio.npy_double, &fluid->uz)) return 1;
 #endif
-  if(0 != array.load(domain, dirname_ic,  "p", fileio.npy_double, &fluid-> p)) return 1;
-  if(0 != array.load(domain, dirname_ic,  "t", fileio.npy_double, &fluid-> t)) return 1;
+  if (0 != array.load(domain, dirname_ic,  "p", fileio.npy_double, &fluid-> p)) return 1;
+  if (0 != array.load(domain, dirname_ic,  "t", fileio.npy_double, &fluid-> t)) return 1;
   // impose boundary conditions and communicate halo cells | 7
-  if(0 != fluid_update_boundaries_ux(domain, &fluid->ux)) return 1;
-  if(0 != fluid_update_boundaries_uy(domain, &fluid->uy)) return 1;
+  if (0 != fluid_update_boundaries_ux(domain, &fluid->ux)) return 1;
+  if (0 != fluid_update_boundaries_uy(domain, &fluid->uy)) return 1;
 #if NDIMS == 3
-  if(0 != fluid_update_boundaries_uz(domain, &fluid->uz)) return 1;
+  if (0 != fluid_update_boundaries_uz(domain, &fluid->uz)) return 1;
 #endif
-  if(0 != fluid_update_boundaries_p(domain, &fluid->p)) return 1;
-  if(0 != fluid_update_boundaries_t(domain, &fluid->t)) return 1;
-  // compute diffusivities | 4
-  if(0 != config.get_double("Pr", &fluid->Pr)) return 1;
-  if(0 != config.get_double("Ra", &fluid->Ra)) return 1;
-  fluid->m_dif = 1. * sqrt(fluid->Pr) / sqrt(fluid->Ra);
-  fluid->t_dif = 1. / sqrt(fluid->Pr) / sqrt(fluid->Ra);
+  if (0 != fluid_update_boundaries_p(domain, &fluid->p)) return 1;
+  if (0 != fluid_update_boundaries_t(domain, &fluid->t)) return 1;
+  // load diffusivities | 2
+  if (0 != config.get_double("Pr", &fluid->Pr)) return 1;
+  if (0 != config.get_double("Ra", &fluid->Ra)) return 1;
   report(domain->info, fluid);
   return 0;
 }

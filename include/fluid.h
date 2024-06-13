@@ -33,7 +33,20 @@ typedef struct {
 #endif
   array_t srct[3];
   double Ra, Pr;
-  double m_dif, t_dif;
 } fluid_t;
+
+// initialiser of fluid_t
+extern int fluid_init(
+    const char dirname_ic[],
+    const domain_t * domain,
+    fluid_t * fluid
+);
+
+// save flow field
+extern int fluid_save(
+    const char dirname[],
+    const domain_t * domain,
+    const fluid_t * fluid
+);
 
 #endif // FLUID_H

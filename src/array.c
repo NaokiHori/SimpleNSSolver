@@ -7,7 +7,7 @@
 #include "array.h"
 #include "fileio.h"
 
-static int prepare(
+static int create(
     const domain_t * domain,
     const int nadds[NDIMS][2],
     size_t size,
@@ -288,7 +288,7 @@ static int dump(
 }
 
 const array_method_t array = {
-  .prepare = prepare,
+  .create  = create,
   .destroy = destroy,
   .load    = load,
   .dump    = dump,

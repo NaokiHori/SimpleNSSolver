@@ -15,8 +15,8 @@ int fluid_save(
   int myrank = root;
   sdecomp.get_comm_rank(domain->info, &myrank);
   if(root == myrank){
-    fileio.w_serial(dirname, "m_dif", 0, NULL, fileio.npy_double, sizeof(double), &fluid->m_dif);
-    fileio.w_serial(dirname, "t_dif", 0, NULL, fileio.npy_double, sizeof(double), &fluid->t_dif);
+    fileio.w_serial(dirname, "Ra", 0, NULL, fileio.npy_double, sizeof(double), &fluid->Ra);
+    fileio.w_serial(dirname, "Pr", 0, NULL, fileio.npy_double, sizeof(double), &fluid->Pr);
   }
   // collective
   array.dump(domain, dirname, "ux", fileio.npy_double, &fluid->ux);

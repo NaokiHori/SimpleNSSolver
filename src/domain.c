@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <float.h>
+#include <assert.h>
 #include <mpi.h>
 #if NDIMS == 3
 #include <fftw3.h>
@@ -13,8 +14,10 @@
 #include "fileio.h"
 #include "array_macros/domain/xf.h"
 #include "array_macros/domain/xc.h"
-#include "array_macros/domain/dxf.h"
-#include "array_macros/domain/dxc.h"
+#include "array_macros/domain/hxxf.h"
+#include "array_macros/domain/hxxc.h"
+#include "array_macros/domain/jdxf.h"
+#include "array_macros/domain/jdxc.h"
 
 /**
  * @brief load members in domain_t
@@ -73,31 +76,6 @@ int domain_save(
   fileio.w_serial(dirname, "lengths", 1, (size_t [1]){NDIMS}, fileio.npy_double, sizeof(double), lengths);
   fileio.w_serial(dirname, "xf", 1, (size_t [1]){glsizes[0] + 1}, fileio.npy_double, sizeof(double), xf);
   fileio.w_serial(dirname, "xc", 1, (size_t [1]){glsizes[0] + 2}, fileio.npy_double, sizeof(double), xc);
-  return 0;
-}
-
-int domain_check_x_grid_is_uniform(
-    const domain_t * domain,
-    bool * x_grid_is_uniform
-){
-  static bool is_checked = false;
-  static bool is_uniform = false;
-  if(!is_checked){
-    const size_t isize = domain->glsizes[0];
-    const double * dxf = domain->dxf;
-    double extrema[2] = {+1. * DBL_MAX, -1. * DBL_MAX};
-    for(size_t i = 0; i < isize; i++){
-      extrema[0] = fmin(extrema[0], dxf[i]);
-      extrema[1] = fmax(extrema[1], dxf[i]);
-    }
-    if(fabs(extrema[1] - extrema[0]) < 1.e-15){
-      is_uniform = true;
-    }else{
-      is_uniform = false;
-    }
-    is_checked = true;
-  }
-  *x_grid_is_uniform = is_uniform;
   return 0;
 }
 
@@ -274,48 +252,72 @@ static int optimise_sdecomp_init(
 }
 #endif
 
-/**
- * @brief define face-to-face distances in x direction
- * @param[in] isize : number of cell-centers in x direction (boundary excluded)
- * @param[in] xf    : cell-face positions in x direction
- * @return          : face-to-face distances in x direction
- */
-static double * allocate_and_init_dxf(
-    const int isize,
-    const double * xf
-){
-  // dxf: distance from cell face to cell face | 8
-  // NOTE: since xf has "isize + 1" items,
-  //   dxf, which tells the distance of the two neighbouring cell faces,
-  //   has "isize" elements, whose index starts from 1
-  const size_t nitems = isize;
-  double * dxf = memory_calloc(nitems, sizeof(double));
-  for(size_t i = 1; i <= nitems; i++){
-    DXF(i  ) = XF(i+1) - XF(i  );
-  }
-  return dxf;
-}
-
-/**
- * @brief define center-to-center distances in x direction
- * @param[in] isize : number of cell-centers in x direction (boundary excluded)
- * @param[in] xc    : cell-center positions in x direction
- * @return          : center-to-center distances in x direction
- */
-static double * allocate_and_init_dxc(
+// x scale factors at x cell faces | 10
+static double * allocate_and_init_hxxf (
     const int isize,
     const double * xc
-){
-  // dxc: distance from cell center to cell center (generally) | 8
-  // NOTE: since xc has "isize + 2" items,
-  //   dxc, which tells the distance of the two neighbouring cell centers,
-  //   has "isize + 1" elements, whose index starts from 1
-  const size_t nitems = isize + 1;
-  double * dxc = memory_calloc(nitems, sizeof(double));
-  for(size_t i = 1; i <= nitems; i++){
-    DXC(i  ) = XC(i  ) - XC(i-1);
+) {
+  double * hxxf = memory_calloc(isize + 1, sizeof(double));
+  for (int i = 1; i <= isize + 1; i++) {
+    HXXF(i  ) = XC(i  ) - XC(i-1);
   }
-  return dxc;
+  return hxxf;
+}
+
+// x scale factors at x cell centers | 10
+static double * allocate_and_init_hxxc (
+    const int isize,
+    const double * xf
+) {
+  double * hxxc = memory_calloc(isize, sizeof(double));
+  for (int i = 1; i <= isize; i++) {
+    HXXC(i  ) = XF(i+1) - XF(i  );
+  }
+  return hxxc;
+}
+
+// jacobian determinants at x cell faces | 20
+static double * allocate_and_init_jdxf (
+    const int isize,
+    const double * hxxf,
+#if NDIMS == 2
+    const double hy
+#else
+    const double hy,
+    const double hz
+#endif
+) {
+  double * jdxf = memory_calloc(isize + 1, sizeof(double));
+  for (int i = 1; i <= isize + 1; i++) {
+#if NDIMS == 2
+    JDXF(i  ) = HXXF(i  ) * hy;
+#else
+    JDXF(i  ) = HXXF(i  ) * hy * hz;
+#endif
+  }
+  return jdxf;
+}
+
+// jacobian determinants at x cell centers | 20
+static double * allocate_and_init_jdxc (
+    const int isize,
+    const double * hxxc,
+#if NDIMS == 2
+    const double hy
+#else
+    const double hy,
+    const double hz
+#endif
+) {
+  double * jdxc = memory_calloc(isize, sizeof(double));
+  for (int i = 1; i <= isize; i++) {
+#if NDIMS == 2
+    JDXC(i  ) = HXXC(i  ) * hy;
+#else
+    JDXC(i  ) = HXXC(i  ) * hy * hz;
+#endif
+  }
+  return jdxc;
 }
 
 static void report(
@@ -354,24 +356,34 @@ int domain_init(
   double * restrict lengths =  domain->lengths;
   double * restrict * xf    = &domain->xf;
   double * restrict * xc    = &domain->xc;
-  double * restrict * dxf   = &domain->dxf;
-  double * restrict * dxc   = &domain->dxc;
-  double * restrict   dy    = &domain->dy;
+  double * restrict * hxxf  = &domain->hxxf;
+  double * restrict * hxxc  = &domain->hxxc;
+  double * restrict   hy    = &domain->hy;
 #if NDIMS == 3
-  double * restrict   dz    = &domain->dz;
+  double * restrict   hz    = &domain->hz;
 #endif
+  double * restrict * jdxf  = &domain->jdxf;
+  double * restrict * jdxc  = &domain->jdxc;
   // load spatial information | 3
   if(0 != domain_load(dirname_ic, domain)){
     return 1;
   }
-  // compute grid sizes | 8
-  // allocate and initialise x coordinates
-  *dxf = allocate_and_init_dxf(glsizes[0], *xf);
-  *dxc = allocate_and_init_dxc(glsizes[0], *xc);
-  // grid sizes in homogeneous directions
-  *dy = lengths[1] / glsizes[1];
+  // allocate and initialise scale factors
+  *hxxf = allocate_and_init_hxxf(glsizes[0], *xc);
+  *hxxc = allocate_and_init_hxxc(glsizes[0], *xf);
+  // y scale factor | 1
+  *hy = lengths[1] / glsizes[1];
 #if NDIMS == 3
-  *dz = lengths[2] / glsizes[2];
+  // z scale factor | 1
+  *hz = lengths[2] / glsizes[2];
+#endif
+  // allocate and initialise Jacobian determinants
+#if NDIMS == 2
+  *jdxf = allocate_and_init_jdxf(glsizes[0], *hxxf, *hy);
+  *jdxc = allocate_and_init_jdxc(glsizes[0], *hxxc, *hy);
+#else
+  *jdxf = allocate_and_init_jdxf(glsizes[0], *hxxf, *hy, *hz);
+  *jdxc = allocate_and_init_jdxc(glsizes[0], *hxxc, *hy, *hz);
 #endif
   // initialise sdecomp to distribute the domain | 14
 #if NDIMS == 2

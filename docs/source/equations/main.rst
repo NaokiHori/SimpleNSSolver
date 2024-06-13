@@ -5,200 +5,150 @@
 Equations
 #########
 
-*******************
-Governing equations
-*******************
-
-================
+****************
 Dimensional form
-================
+****************
 
-In this project, I consider the conservation laws of the mass, the momentum, and the internal energy, which are governed by
-
-.. math::
-
-   \der{\tilde{u}_i}{\tilde{x}_i}
-   =
-   0,
+In this project, we consider the conservation laws of the mass, the momentum, and the internal energy, which are governed by
 
 .. math::
 
-   \der{\tilde{u}_i}{\tilde{t}}
-   +
-   \tilde{u}_j \der{\tilde{u}_i}{\tilde{x}_j}
-   =
-   -
-   \frac{1}{\tilde{\rho}} \der{\tilde{p}}{\tilde{x}_i}
-   +
-   \tilde{\nu} \der{}{\tilde{x}_j} \der{\tilde{u}_i}{\tilde{x}_j}
-   +
-   \tilde{g}_i,
-
-and
+    \pder{\tilde{u}_i}{\tilde{x}_i}
+    =
+    0,
 
 .. math::
 
-   \der{\tilde{T}}{\tilde{t}}
-   +
-   \tilde{u}_i \der{\tilde{T}}{\tilde{x}_i}
-   =
-   \tilde{\kappa} \der{}{\tilde{x}_i} \der{\tilde{T}}{\tilde{x}_i},
+    \pder{\tilde{u}_i}{\tilde{t}}
+    +
+    \tilde{u}_j \pder{\tilde{u}_i}{\tilde{x}_j}
+    =
+    -
+    \frac{1}{\tilde{\rho}} \pder{\tilde{p}}{\tilde{x}_i}
+    +
+    \tilde{\nu} \pder{}{\tilde{x}_j} \pder{\tilde{u}_i}{\tilde{x}_j}
+    +
+    \tilde{g}_i,
 
-respectively.
+.. math::
+
+    \pder{\tilde{T}}{\tilde{t}}
+    +
+    \tilde{u}_j \pder{\tilde{T}}{\tilde{x}_j}
+    =
+    \tilde{\kappa} \pder{}{\tilde{x}_j} \pder{\tilde{T}}{\tilde{x}_j},
+
+respectively, where the summation rule is applied.
 
 .. note::
 
-   Physical properties (e.g. the density :math:`\tilde{\rho}`, the kinematic viscosity :math:`\tilde{\nu}`, the thermal diffusivity :math:`\tilde{\kappa}`) are assumed to be constant in time and in space.
+    * :math:`\tilde{q}` implies that the quantity :math:`q` is dimensional (i.e., before normalised).
 
-   :math:`\tilde{q}` implies that the quantity :math:`q` is dimensional (i.e. before normalised).
+    * We assume the physical properties (e.g., the density :math:`\tilde{\rho}`, the dynamic and kinematic viscosities :math:`\tilde{\mu}, \tilde{\nu}`, the thermal diffusivity :math:`\tilde{\kappa}`) to be constant.
 
-Also, by combining the mass balance and the momentum balance, the equation of the squared velocity
-
-.. math::
-
-   \der{\tilde{k}}{\tilde{t}}
-   +
-   \tilde{u}_i \der{\tilde{k}}{\tilde{x}_i}
-   =
-   -
-   \tilde{u}_i \frac{1}{\tilde{\rho}} \der{\tilde{p}}{\tilde{x}_i}
-   +
-   \tilde{\nu} \der{}{\tilde{x}_j} \left( \tilde{u}_i \der{\tilde{u}_i}{\tilde{x}_j} \right)
-   -
-   \tilde{\nu} \der{\tilde{u}_i}{\tilde{x}_j} \der{\tilde{u}_i}{\tilde{x}_j}
-   +
-   \tilde{u}_i \tilde{g}_i
-
-comes out, where
-
-.. math::
-
-   \tilde{k}
-   \equiv
-   \frac{1}{2}
-   \tilde{u}_i \tilde{u}_i.
-
-Similarly I obtain the equation of the squared temperature
-
-.. math::
-
-   \der{\tilde{h}}{\tilde{t}}
-   +
-   \tilde{u}_i \der{\tilde{h}}{\tilde{x}_i}
-   =
-   \tilde{\kappa} \der{}{\tilde{x}_i} \left( \tilde{T} \der{\tilde{T}}{\tilde{x}_i} \right)
-   -
-   \tilde{\kappa} \der{\tilde{T}}{\tilde{x}_i} \der{\tilde{T}}{\tilde{x}_i}
-
-using the internal energy balance, where
-
-.. math::
-
-   \tilde{h}
-   \equiv
-   \frac{1}{2}
-   \tilde{T} \tilde{T}.
-
-These additional equations also play important roles in the following discussion.
-
-Although the derivations can be found everywhere, they are briefly discussed here for the sake of completeness.
-
-.. toctree::
-   :maxdepth: 1
-
-   eq/mass
-   eq/momentum
-   eq/internal_energy
-
-====================
+********************
 Non-dimensional form
-====================
+********************
 
-In this project, I focus on `Rayleigh-Bénard convection <https://en.wikipedia.org/wiki/Rayleigh–Bénard_convection>`_, which is an excellent model problem to shed light on the conservation properties.
-By adopting `Boussinesq approximation <https://en.wikipedia.org/wiki/Boussinesq_approximation_(buoyancy)>`_ and normalise the equations with proper scales, I obtain the following non-dimensional equations which play the central role in this project.
+In this project, we focus on `Rayleigh-Bénard convection <https://en.wikipedia.org/wiki/Rayleigh–Bénard_convection>`_, which is an excellent model problem to shed light on the conservation properties.
+By adopting `Boussinesq approximation <https://en.wikipedia.org/wiki/Boussinesq_approximation_(buoyancy)>`_ and normalise the equations with proper scales, we obtain the following non-dimensional equations which play the central role in this project.
 
 .. _eq_mass:
 
-* Mass balance
+.. math::
 
-   .. math::
-
-      \der{u_i}{x_i}
-      =
-      0.
+    \pder{u_i}{x_i}
+    =
+    0.
 
 .. _eq_momentum:
 
-* Momentum balance
+.. math::
 
-   .. math::
-
-      \der{u_i}{t}
-      +
-      u_j \der{u_i}{x_j}
-      =
-      -
-      \der{p}{x_i}
-      +
-      \frac{\sqrt{Pr}}{\sqrt{Ra}} \der{}{x_j} \der{u_i}{x_j}
-      +
-      T \delta_{ix}.
+    \pder{u_i}{t}
+    +
+    u_j \pder{u_i}{x_j}
+    =
+    -
+    \pder{p}{x_i}
+    +
+    \frac{\sqrt{Pr}}{\sqrt{Ra}} \pder{}{x_j} \pder{u_i}{x_j}
+    +
+    T \delta_{ix}.
 
 .. _eq_temperature:
 
-* Internal energy balance
+.. math::
 
-   .. math::
-
-      \der{T}{t}
-      +
-      u_i \der{T}{x_i}
-      =
-      \frac{1}{\sqrt{Pr} \sqrt{Ra}} \der{}{x_i} \der{T}{x_i}.
-
-.. _eq_squared_velocity:
-
-* Equation of the squared velocity
-
-   .. math::
-
-      \der{k}{t} + u_i \der{k}{x_i}
-      =
-      -
-      u_i \der{p}{x_i}
-      +
-      \frac{\sqrt{Pr}}{\sqrt{Ra}} \der{}{x_j} \left( u_i \der{u_i}{x_j} \right)
-      -
-      \frac{\sqrt{Pr}}{\sqrt{Ra}} \der{u_i}{x_j} \der{u_i}{x_j}
-      +
-      u_i T \delta_{ix}.
-
-.. _eq_squared_temperature:
-
-* Equation of the squared temperature
-
-   .. math::
-
-      \der{h}{t}
-      +
-      u_i \der{h}{x_i}
-      =
-      \frac{1}{\sqrt{Pr} \sqrt{Ra}} \der{}{x_i} \left( T \der{T}{x_i} \right)
-      -
-      \frac{1}{\sqrt{Pr} \sqrt{Ra}} \der{T}{x_i} \der{T}{x_i}.
+    \pder{T}{t}
+    +
+    u_j \pder{T}{x_j}
+    =
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}} \pder{}{x_j} \pder{T}{x_j}.
 
 Here Rayleigh number :math:`Ra` and Prandtl number :math:`Pr` are dimensionless parameters given by
 
 .. math::
 
-   Ra & = \frac{\tilde{\beta} \tilde{g} {\tilde{l_x}}^3 \left( \Delta \tilde{T} \right)}{\tilde{\nu} \tilde{\kappa}}, \\
-   Pr & = \frac{\tilde{\nu}}{\tilde{\kappa}},
+    Ra & = \frac{\tilde{\beta} \tilde{g} {\tilde{l_x}}^3 \left( \Delta \tilde{T} \right)}{\tilde{\nu} \tilde{\kappa}}, \\
+    Pr & = \frac{\tilde{\nu}}{\tilde{\kappa}},
 
 where :math:`\tilde{\beta}`, :math:`\tilde{g}`, :math:`\tilde{l_x}`, and :math:`\Delta \tilde{T} = \tilde{T}_{H} - \tilde{T}_{L}` are the thermal expansion coefficient :math:`\left[ K^{-1} \right]`, the gravitational acceleration :math:`\left[ L T^{-2} \right]`, the distance between the walls :math:`\left[ L \right]`, and the temperature difference :math:`\left[ K \right]`, respectively.
 
+Also, by taking the inner product of the momentum balance and the velocity vector, a relation with respect to the squared velocity is obtained:
+
+.. _eq_squared_velocity:
+
+.. math::
+
+    \pder{k}{t}
+    +
+    u_j \pder{k}{x_j}
+    =
+    -
+    u_j \pder{p}{x_j}
+    +
+    \frac{\sqrt{Pr}}{\sqrt{Ra}} \pder{}{x_j} \left( u_i \pder{u_i}{x_j} \right)
+    -
+    \frac{\sqrt{Pr}}{\sqrt{Ra}} \pder{u_i}{x_j} \pder{u_i}{x_j}
+    +
+    u_i T \delta_{ix},
+
+where
+
+.. math::
+
+    \tilde{k}
+    \equiv
+    \frac{1}{2}
+    \tilde{u}_i \tilde{u}_i.
+
+Similarly, by multiplying the temperature with the internal energy balance, we obtain the relation with respect to the squared temperature:
+
+.. _eq_squared_temperature:
+
+.. math::
+
+    \pder{h}{t}
+    +
+    u_j \pder{h}{x_j}
+    =
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}} \pder{}{x_j} \left( T \pder{T}{x_j} \right)
+    -
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}} \pder{T}{x_j} \pder{T}{x_j},
+
+where
+
+.. math::
+
+    \tilde{h}
+    \equiv
+    \frac{1}{2}
+    \tilde{T} \tilde{T}.
+
 .. image:: image/schematic.png
-   :align: center
-   :width: 400
+    :align: center
+    :width: 400
 
 Periodic boundary conditions are imposed in the homogeneous directions :math:`y` and :math:`z`.
 The boundary conditions in the :math:`x` (wall-normal) direction are listed here:
@@ -213,30 +163,390 @@ The boundary conditions in the :math:`x` (wall-normal) direction are listed here
 
 .. note::
 
-   * Without loss of generality, I can fix :math:`\tilde{\beta}`, :math:`\tilde{g}`, :math:`\tilde{l_x}`, and :math:`\Delta \tilde{T}` to unity, which is assumed in this project.
+    * Without loss of generality, :math:`\tilde{\beta}`, :math:`\tilde{g}`, :math:`\tilde{l_x}`, and :math:`\Delta \tilde{T}` are fixed to unity.
 
-   * The reference velocity scale :math:`\tilde{U} \left[ L T^{-1} \right]` is defined by the other parameters :math:`\tilde{U} = \sqrt{\tilde{\beta} \tilde{g} \tilde{l_x} \left( \Delta \tilde{T} \right)} \left( = 1 \right)`, which is often called as the free-fall velocity.
+    * The reference velocity scale :math:`\tilde{U} \left[ L T^{-1} \right]` is defined by the other parameters :math:`\tilde{U} = \sqrt{\tilde{\beta} \tilde{g} \tilde{l_x} \left( \Delta \tilde{T} \right)} \left( = 1 \right)`, which is often called as the free-fall velocity.
 
-   * Although it is numerically trivial to let the walls move in the homogeneous directions, the following discussion assumes the walls are at rest.
-     In particular, I need to modify :ref:`the Nusselt number based on the kinetic energy dissipation <nu_kinetic_energy_dissipation>` if the walls move.
+.. _continuous_quadratic_quantities:
 
-**************
-Nusselt number
-**************
+********************
+Quadratic Quantities
+********************
 
-One of the most important features of the Rayleigh-Bénard convections is the theoretical relationships of the Nusselt number :math:`Nu`, which measures how much the heat transfer between the two walls is enhanced by the convective effects.
-In this part, I mathematically define the heat flux and the Nusselt number, which is followed by the derivations of several :math:`Nu` relationships in the continuous domain.
+We investigate the properties of the mentioned relations with respect to the quadratic quantities :math:`k` and :math:`h`.
+In particular, we focus on how the net amount of them:
 
-.. toctree::
-   :maxdepth: 1
+.. math::
 
-   nu/heat_flux
-   nu/kinetic_energy_injection
-   nu/kinetic_energy_dissipation
-   nu/thermal_energy_dissipation
+    &
+    \int
+    \int
+    \int
+    k
+    dx
+    dy
+    dz,
 
-.. seealso::
+    &
+    \int
+    \int
+    \int
+    h
+    dx
+    dy
+    dz,
 
-   Although all :math:`Nu` should give the identical result in the continuous domain, it is non-trivial to satisfy these relations umerically (discrete domain).
-   This is discussed in detail in :ref:`the numerical method <numerics>`.
+behave, which follow
+
+.. math::
+
+    &
+    \int
+    \int
+    \int
+    \pder{k}{t}
+    dx
+    dy
+    dz
+    =
+    \int
+    \int
+    \int
+    \left\{
+        -
+        u_j \pder{k}{x_j}
+        -
+        u_i \pder{p}{x_i}
+        +
+        \frac{\sqrt{Pr}}{\sqrt{Ra}} \pder{}{x_j} \left( u_i \pder{u_i}{x_j} \right)
+        -
+        \frac{\sqrt{Pr}}{\sqrt{Ra}} \pder{u_i}{x_j} \pder{u_i}{x_j}
+        +
+        u_i T \delta_{ix}
+    \right\}
+    dx
+    dy
+    dz,
+
+    &
+    \int
+    \int
+    \int
+    \pder{h}{t}
+    dx
+    dy
+    dz
+    =
+    \int
+    \int
+    \int
+    \left\{
+        -
+        u_j \pder{h}{x_j}
+        +
+        \frac{1}{\sqrt{Pr} \sqrt{Ra}} \pder{}{x_j} \left( T \pder{T}{x_j} \right)
+        -
+        \frac{1}{\sqrt{Pr} \sqrt{Ra}} \pder{T}{x_j} \pder{T}{x_j}
+    \right\}
+    dx
+    dy
+    dz,
+
+giving
+
+.. _quadratic_quantity_balance:
+
+.. math::
+
+    &
+    \int
+    \int
+    \int
+    \pder{k}{t}
+    dx
+    dy
+    dz
+    =
+    \int
+    \int
+    \int
+    u_x T
+    dx
+    dy
+    dz
+    -
+    \int
+    \int
+    \int
+    \frac{\sqrt{Pr}}{\sqrt{Ra}} \pder{u_i}{x_j} \pder{u_i}{x_j}
+    dx
+    dy
+    dz,
+
+    &
+    \int
+    \int
+    \int
+    \pder{h}{t}
+    dx
+    dy
+    dz
+    =
+    \vat{
+        T
+    }{x = 1}
+    \int
+    \int
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+    \vat{
+        \pder{T}{x}
+    }{x = 1}
+    dy
+    dz
+    -
+    \vat{
+        T
+    }{x = 0}
+    \int
+    \int
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+    \vat{
+        \pder{T}{x}
+    }{x = 0}
+    dy
+    dz
+    -
+    \int
+    \int
+    \int
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}} \pder{T}{x_j} \pder{T}{x_j}
+    dx
+    dy
+    dz.
+
+In this project, we aim at faithfully replicating these relations from a numerical standpoint.
+
+Derivation is given below, focusing on the individual components.
+
+===============
+Advective terms
+===============
+
+We have
+
+.. math::
+
+    -
+    \int
+    \int
+    \int
+    u_j \pder{k}{x_j}
+    dx
+    dy
+    dz
+    =
+    -
+    \int
+    \int
+    \int
+    \left(
+        \pder{u_j k}{x_j}
+        -
+        k
+        \pder{u_j}{x_j}
+    \right)
+    dx
+    dy
+    dz,
+
+which is, due to the incompressibility:
+
+.. math::
+
+    -
+    \int
+    \int
+    \int
+    \pder{u_j k}{x_j}
+    dx
+    dy
+    dz
+    =
+    -
+    \int
+    \int
+    \vat{
+        \left(
+            u_x k
+        \right)
+    }{x = 1}
+    dy
+    dz
+    +
+    \int
+    \int
+    \vat{
+        \left(
+            u_x k
+        \right)
+    }{x = 0}
+    dy
+    dz,
+
+where the divergence theorem and the periodic boundary conditions are utilized.
+Since the walls are impermeable, :math:`u_x \equiv 0` on the walls and thus this leads to 0, indicating that the advective terms do not affect the total amount of :math:`k`.
+
+Note that exactly the same statement holds for the advective terms of :math:`h`.
+
+=======================
+Pressure-gradient terms
+=======================
+
+We consider
+
+.. math::
+
+    -
+    \int
+    \int
+    \int
+    u_i \pder{p}{x_i}
+    dx
+    dy
+    dz.
+
+By following the identical algebra we adopted to investigate the advective terms, we find that the pressure-gradient terms do not affect the net amount of :math:`k` either.
+
+============================
+Diffusive terms - conduction
+============================
+
+We have
+
+.. math::
+
+    \int
+    \int
+    \int
+    \frac{\sqrt{Pr}}{\sqrt{Ra}}
+    \pder{}{x_j}
+    \left(
+        u_i
+        \pder{u_i}{x_j}
+    \right)
+    dx
+    dy
+    dz.
+
+By utilizing the divergence theorem, this leads to
+
+.. math::
+
+    \int
+    \int
+    \frac{\sqrt{Pr}}{\sqrt{Ra}}
+    \vat{
+        \left(
+            u_i
+            \pder{u_i}{x}
+        \right)
+    }{x = 1}
+    dy
+    dz
+    -
+    \int
+    \int
+    \frac{\sqrt{Pr}}{\sqrt{Ra}}
+    \vat{
+        \left(
+            u_i
+            \pder{u_i}{x}
+        \right)
+    }{x = 0}
+    dy
+    dz,
+
+where periodic boundary conditions are assumed in the :math:`y` and :math:`z` directions.
+Since we assume that the walls are impermeable and fixed (i.e., :math:`u_i \equiv 0_i` on the walls), the integrands are all zero for all directions, indicating that the conductive terms do not alter the total amount of :math:`k`.
+
+Regarding the conductive terms with respect to :math:`h`, we also have an analogous relation:
+
+.. math::
+
+    \int
+    \int
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+    \vat{
+        \left(
+            T
+            \pder{T}{x}
+        \right)
+    }{x = 1}
+    dy
+    dz
+    -
+    \int
+    \int
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+    \vat{
+        \left(
+            T
+            \pder{T}{x}
+        \right)
+    }{x = 0}
+    dy
+    dz.
+
+Since they are non-zero in general, we find that the conduction plays a role in the budget of :math:`h`.
+
+=============================
+Diffusive terms - dissipation
+=============================
+
+We have
+
+.. math::
+
+    -
+    \int
+    \int
+    \int
+    \frac{\sqrt{Pr}}{\sqrt{Ra}} \pder{u_i}{x_j} \pder{u_i}{x_j}
+    dx
+    dy
+    dz
+
+and
+
+.. math::
+
+    -
+    \int
+    \int
+    \int
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}} \pder{T}{x_j} \pder{T}{x_j}
+    dx
+    dy
+    dz,
+
+which are always non-positive and dissipate :math:`k` and :math:`h`.
+
+===============
+Body force term
+===============
+
+We have
+
+.. math::
+
+    \int
+    \int
+    \int
+    u_x
+    T
+    dx
+    dy
+    dz,
+
+which works as a source term and alters the net amount of :math:`k`.
 

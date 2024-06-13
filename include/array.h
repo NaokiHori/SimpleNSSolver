@@ -24,7 +24,7 @@ typedef struct {
 
 typedef struct {
   // allocate array and store its size information
-  int (* const prepare)(
+  int (* const create)(
       const domain_t * domain,
       const int nadds[NDIMS][2],
       const size_t size,

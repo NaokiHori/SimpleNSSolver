@@ -29,7 +29,6 @@ Simple Navier-Stokes Solver
 
 .. shortcuts
 
-.. _implementations: https://naokihori.github.io/SimpleNSSolver/implementation/main.html
 .. _theories: https://naokihori.github.io/SimpleNSSolver/equations/main.html
 .. _numerics: https://naokihori.github.io/SimpleNSSolver/numerical_method/main.html
 .. _examples: https://naokihori.github.io/SimpleNSSolver/examples/main.html
@@ -41,20 +40,16 @@ Overview
 
 This library numerically solves the incompressible Navier-Stokes equations (coupled with a temperature field) in two- and three-dimensional Cartesian domains using the finite-difference method.
 
-The main objective is to develop a library where the `implementations`_ and their background knowledge (`theories`_ and `numerics`_) are closely linked via a `documentation`_ and various `examples`_, so that users can understand *how* and *why* things are treated.
+The main objective is to develop a library where the implementation and the background knowledge are closely linked via a `documentation`_ and various `examples`_, so that users can understand *how* and *why* things are treated.
 
 ********
 Features
 ********
 
-* Strong link between `theories`_, `numerics`_, `implementations`_ and `examples`_ through a `documentation`_.
-* Automatic code validation (`examples`_) using `GitHub Actions <https://github.com/features/actions>`_.
-* `Numerically perfect mass and momentum balances <https://naokihori.github.io/SimpleNSSolver/examples/typical/main.html>`_.
-* `Numerically perfect Nusselt number agreements <https://naokihori.github.io/SimpleNSSolver/examples/nu/main.html>`_.
-* `Conservation of quadratic quantities (squared velocity and temperature) for inviscid fluids <https://naokihori.github.io/SimpleNSSolver/examples/energy/main.html>`_ and resulting extreme stability.
-* `Pencil-based MPI parallelisation <https://github.com/NaokiHori/SimpleDecomp>`_, from single process to O(10^4) processes.
-* `Efficient FFT-based direct Poisson solver <https://naokihori.github.io/SimpleNSSolver/implementation/fluid/compute_potential/main.html>`_.
-* `Explicit/implicit treatment of diffusive terms in all spatial directions <https://naokihori.github.io/SimpleNSSolver/implementation/linear_system.html>`_ are easily switchable.
+* An energy-consistent treatment of advective, pressure-gradient, and diffusive terms, correctly replicating properties of the conservation laws.
+* `MPI parallelisation <https://github.com/NaokiHori/SimpleDecomp>`_.
+* Efficient FFT-based direct Poisson solver.
+* Explicit / implicit treatments of diffusive terms in all spatial directions.
 
 Please refer to the `documentation`_ for details.
 
@@ -105,9 +100,9 @@ Please consider to use `Windows Subsystem for Linux <https://learn.microsoft.com
 Quick start
 ***********
 
-===========
-Preparation
-===========
+==============
+Pre-processing
+==============
 
 #. Prepare workplace
 
@@ -142,9 +137,9 @@ Preparation
       make output
       make all
 
-==========
-Simulation
-==========
+====
+Main
+====
 
 .. code-block:: console
 
@@ -205,11 +200,10 @@ Several log files, snapshots of the flow fields (which are used to restart the s
 
    output
    ├── log
-   │  ├── divergence.dat
-   │  ├── energy.dat
-   │  ├── momentum.dat
-   │  ├── nusselt.dat
-   │  └── progress.dat
+   │  ├── xxxxx.dat
+   │  ├── yyyyy.dat
+   ...
+   │  └── zzzzz.dat
    ├── save
    │  ├── step00000xxxxx
    │  ├── step00000yyyyy
@@ -220,36 +214,25 @@ Several log files, snapshots of the flow fields (which are used to restart the s
 
 Log files (files under ``output/log`` directory) are written in ASCII format, which are to monitor the progress.
 
-For example, since I adopt the FFT-based Poisson solver in this project, local divergence of the flow field should be small enough, which is written in ``output/log/divergence.dat``:
+For example, since I adopt the FFT-based Poisson solver in this project, local divergence of the flow field should be small enough, which is written in ``output/log/max_divergence.dat``:
 
-.. image:: https://naokihori.github.io/SimpleNSSolver/_images/divergence_2d.png
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/divergence.png
    :width: 50%
 
-Also the Nusselt numbers (computed based on several different definitions, see the `documentation`_) are monitored and written in ``output/log/nusselt.dat``:
+Energy injections and dissipations are also monitored, from which the Nusselt number (computed based on several different definitions) can be extracted:
 
-.. image:: https://naokihori.github.io/SimpleNSSolver/_images/nusselt_time_2d.png
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/nusselt_time.png
    :width: 50%
 
 Flow fields and statistical data are stored in `NPY format <https://numpy.org/doc/stable/reference/generated/numpy.lib.format.html>`_ using `SimpleNpyIO <https://github.com/NaokiHori/SimpleNpyIO>`_.
 When ``Python3`` with ``NumPy`` and ``Matplotlib`` is installed, one can easily visualise the flow fields:
 
-.. image:: https://naokihori.github.io/SimpleNSSolver/_images/snapshot_2d.png
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/snapshot.png
    :width: 50%
 
-Also it is trivial to extract statistics.
-For example, this plot shows the fluctuations of the flow quantities:
+or statistics (e.g., mean advective and diffusive heat transfer):
 
-.. image:: https://naokihori.github.io/SimpleNSSolver/_images/std_2d.png
-   :width: 50%
-
-or the mean heat flux:
-
-.. image:: https://naokihori.github.io/SimpleNSSolver/_images/nusselt_x_2d.png
-   :width: 50%
-
-By varying the parameter (in particular the Rayleigh number ``Ra``), one can observe a famous scaling law:
-
-.. image:: https://naokihori.github.io/SimpleNSSolver/_images/nu_ra.png
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/nusselt_x.png
    :width: 50%
 
 Note that all the results shown here are automatically updated to maintain / improve the code quality, and all scripts to produce the above figures are available in the `examples`_.
@@ -260,19 +243,19 @@ See the `documentation`_ for more details.
 *************
 
 By default, this project simulates two-dimensional cases because they are easy to test and thus can be a good starting point.
-When the three-dimensional counterpart is needed, checkout the ``3d`` branch.
-Note that the ``main`` branch contains both dimensions, which is for the developers to maintain both cases at the same time.
+When a three-dimensional version is needed, checkout ``3d`` branch.
+Note that the ``main`` branch contains both dimensions, which is to maintain both cases at the same time (mainly for personal use).
 
 Please refer to the `examples`_, where several small-scale 3D simulations are attempted as a part of the continuous integration.
 
-.. image:: https://naokihori.github.io/SimpleNSSolver/_images/snapshot_3d.png
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-3d/snapshot.png
    :width: 50%
 
 ************
 Contributing
 ************
 
-Feel free to ask questions, to report bugs, or to suggest new features at `issues <https://github.com/NaokiHori/SimpleNSSolver/issues>`_.
+Feel free to ask questions, report bugs, suggest new features, polish documentation at `issues <https://github.com/NaokiHori/SimpleNSSolver/issues>`_.
 
 ****************
 Acknowledgements

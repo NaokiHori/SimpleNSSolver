@@ -3,121 +3,69 @@
 
 .. include:: /references.txt
 
-#############################
-Typical 2D and 3D simulations
-#############################
-
-.. mydetails:: Signatures
-
-   .. literalinclude:: data/ci_2d.txt
-      :language: text
-
-   .. literalinclude:: data/ci_3d.txt
-      :language: text
-
-*************
-Configuration
-*************
-
-.. mydetails:: Two-dimensional case:
-
-   .. literalinclude:: data/exec_2d.sh
-      :language: sh
-      :linenos:
-
-.. mydetails:: Three-dimensional case:
-
-   .. literalinclude:: data/exec_3d.sh
-      :language: sh
-      :linenos:
+#############
+Typical Cases
+#############
 
 **************
 Visualisations
 **************
 
-Temperature fields at the end of the simulations are visualised here.
+Temperature fields at the end of the simulations.
 
-* 2D:
+2D:
 
-   .. image:: data/snapshot_2d.png
-      :width: 600
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/snapshot.png
+  :width: 600
 
-   .. mydetails:: Script
+3D:
 
-      .. literalinclude:: data/snapshot_2d.py
-         :language: python
-         :linenos:
-
-* 3D
-
-   .. image:: data/snapshot_3d.png
-      :width: 600
-
-   .. mydetails:: Script
-
-      .. literalinclude:: data/snapshot_3d.py
-         :language: python
-         :linenos:
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-3d/snapshot.png
+  :width: 600
 
 ****************************
 Incompressibility constraint
 ****************************
 
-The local divergence of the velocity fields should be sufficiently small, which is monitored during the simulation and checked here.
+Maximum divergence of the velocity field, which should be sufficiently small.
 
-* 2D
+2D:
 
-   .. image:: data/divergence_2d.png
-      :width: 600
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/divergence.png
+  :width: 600
 
-* 3D
+3D:
 
-   .. image:: data/divergence_3d.png
-      :width: 600
-
-.. mydetails:: Script
-
-   .. literalinclude:: data/divergence.py
-      :language: python
-      :linenos:
-
-.. seealso::
-
-   :ref:`src/logging/divergence.c <logging_check_divergence>`
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-3d/divergence.png
+  :width: 600
 
 ***************
 Nusselt numbers
 ***************
 
-=====================
-As a function of time
-=====================
+=========
+Evolution
+=========
 
 :math:`Nu` calculated using the different formulae, which are monitored during the run, are shown as a function of time:
 
-   * red: heat fluxes on the walls
+* red: heat fluxes on the walls
 
-   * blue: energy input
+* blue: energy input
 
-   * green: kinetic energy dissipation
+* green: kinetic energy dissipation
 
-   * magenta: thermal energy dissipation
+* magenta: thermal energy dissipation
 
-* 2D
+2D:
 
-   .. image:: data/nusselt_time_2d.png
-      :width: 600
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/nusselt_time.png
+  :width: 600
 
-* 3D
+3D:
 
-   .. image:: data/nusselt_time_3d.png
-      :width: 600
-
-.. mydetails:: Script
-
-   .. literalinclude:: data/nusselt_time.py
-      :language: python
-      :linenos:
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-3d/nusselt_time.png
+  :width: 600
 
 .. note::
 
@@ -125,41 +73,45 @@ As a function of time
 
 .. seealso::
 
-   Check :ref:`Nusselt number relations <nusselt_number_relations>` to see the definition of each :math:`Nu`, and :ref:`src/logging/nusselt <logging_nusselt>` to see how they are computed.
+   :ref:`Nusselt number relations <discrete_nusselt>`.
 
-=======
-Average
-=======
+=========================
+Temporary-Averaged Values
+=========================
 
-There are two contributions, advective contribution:
+As derived :ref:`here <eq_heat_transfer>`, there are two contributions which transfer heat: advective contribution:
 
 .. math::
 
-   \ave{\ux T}{y,z,t},
+    \sumzc
+    \sumyc
+    \frac{J}{\sfact{1}}
+    \vel{1}
+    \ave{T}{\gcs{1}},
 
 and diffusive contribution:
 
 .. math::
 
-   - \frac{1}{\sqrt{Pr} \sqrt{Ra}} \frac{d}{dx} \ave{T}{y,z,t},
+    -
+    \sumzc
+    \sumyc
+    \frac{1}{\sqrt{Pr} \sqrt{Ra}}
+    \frac{J}{\sfact{1}}
+    \frac{1}{\sfact{1}}
+    \dif{T}{\gcs{1}}.
 
-which are a function of the wall-normal position :math:`x` and shown separately:
+After averaged over time and homogeneous directions, they are displayed as a function of the wall-normal position :math:`x` here:
 
-* 2D
+2D:
 
-   .. image:: data/nusselt_x_2d.png
-      :width: 600
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/nusselt_x.png
+  :width: 600
 
-* 3D
+3D:
 
-   .. image:: data/nusselt_x_3d.png
-      :width: 600
-
-.. mydetails:: Script
-
-   .. literalinclude:: data/nusselt_x.py
-      :language: python
-      :linenos:
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-3d/nusselt_x.png
+  :width: 600
 
 *******************
 Standard deviations
@@ -167,24 +119,17 @@ Standard deviations
 
 Variances of (red) :math:`\ux`, (blue) :math:`\uy`, (magenta) :math:`\uz`, and (green) :math:`T` are shown here.
 
-* 2D
+2D:
 
-   .. image:: data/std_2d.png
-      :width: 600
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-2d/std.png
+  :width: 600
 
-* 3D
+3D:
 
-   .. image:: data/std_3d.png
-      :width: 600
-
-.. mydetails:: Script
-
-   .. literalinclude:: data/std.py
-      :language: python
-      :linenos:
+.. image:: https://raw.githubusercontent.com/NaokiHori/SimpleNSSolver/artifacts/artifacts/typical-3d/std.png
+  :width: 600
 
 .. note::
 
-   Although the :math:`y` and the :math:`z` directions are homogeneous, the blue and the magenta lines may show a deviation.
-   This is attributed to the low :math:`Ra` and the short simulation time to reduce the running cost.
+   Although the :math:`y` and the :math:`z` directions are homogeneous, the blue and magenta lines may deviate, which is attributed to the low :math:`Ra` and short time.
 
