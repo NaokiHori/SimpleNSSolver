@@ -1,0 +1,3 @@
+OS   : "Ubuntu 22.04.4 LTS"
+Date : Mon Jun 17 21:07:45 UTC 2024
+Hash : 47379bb910f2da58514547d04cf2d2c360429763
