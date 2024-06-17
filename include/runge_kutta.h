@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-// Runge-Kutta configurations | 10
+// Runge-Kutta configurations
 // NOTE: three buffers: alpha, beta, gamma
 #define RKNBUFFERS 3
 // indices

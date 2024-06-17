@@ -1,5 +1,5 @@
 CC     := mpicc
-CFLAG  := -std=c99 -Wall -Wextra -O3 -DNDIMS=2
+CFLAG  := -std=c99 -Wall -Wextra -O3 -DNDIMS=3
 INC    := -Iinclude -ISimpleDecomp/include -ISimpleNpyIO/include
 LIB    := -lfftw3 -lm
 SRCDIR := src SimpleDecomp/src SimpleNpyIO/src
