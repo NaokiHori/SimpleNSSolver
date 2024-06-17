@@ -4,7 +4,7 @@
 #include "array.h"
 #include "domain.h"
 
-// definition of a structure fluid_t_ | 30
+// definition of a structure fluid_t_
 /**
  * @struct fluid_t
  * @brief struct storing fluid-related variables
@@ -20,17 +20,11 @@
 typedef struct {
   array_t ux;
   array_t uy;
-#if NDIMS == 3
-  array_t uz;
-#endif
   array_t p;
   array_t psi;
   array_t t;
   array_t srcux[3];
   array_t srcuy[3];
-#if NDIMS == 3
-  array_t srcuz[3];
-#endif
   array_t srct[3];
   double Ra, Pr;
 } fluid_t;
