@@ -5,6 +5,11 @@ matplotlib.use("Agg")
 from matplotlib import pyplot
 from matplotlib import patches
 
+is_periodic_x = False
+
+isize = "isize"
+jsize = "jsize"
+
 def staggered1():
     matplotlib.rcParams["font.size"] = 20
     fig = pyplot.figure(figsize=(8, 4))
@@ -89,9 +94,10 @@ def gen_ax(sizes):
     }
     # water
     ax.add_patch(patches.Rectangle((0., 0.), sizes[0], sizes[1], color="#00FFFF"))
-    # walls
-    ax.add_patch(patches.Rectangle((-1., -1.), 1., 2.+sizes[1], color="#888888"))
-    ax.add_patch(patches.Rectangle((sizes[0], -1.), 1., 2.+sizes[1], color="#888888"))
+    if not is_periodic_x:
+        # walls
+        ax.add_patch(patches.Rectangle((-1., -1.), 1., 2.+sizes[1], color="#888888"))
+        ax.add_patch(patches.Rectangle((sizes[0], -1.), 1., 2.+sizes[1], color="#888888"))
     # grid lines
     offsets = [-1., 3., 7.]
     for yoffset in offsets:
@@ -107,23 +113,42 @@ def gen_ax(sizes):
 
 def get_xparams(is_face, size):
     if is_face:
-        xs = np.arange(0.0, size+1.0, 1)
-        xlabels = (
-                "1",
-                "2",
-                "3",
-                "i-1",
-                "i",
-                "i+1",
-                "i+2",
-                "isize-1",
-                "isize",
-                "isize+1",
-        )
+        if is_periodic_x:
+            xs = np.arange(-1.0, size+1.0, 1)
+            xlabels = (
+                    "0",
+                    "1",
+                    "2",
+                    "3",
+                    "i-1",
+                    "i",
+                    "i+1",
+                    "i+2",
+                    f"{isize}-1",
+                    f"{isize}",
+                    f"{isize}+1",
+            )
+        else:
+            xs = np.arange(0.0, size+1.0, 1)
+            xlabels = (
+                    "1",
+                    "2",
+                    "3",
+                    "i-1",
+                    "i",
+                    "i+1",
+                    "i+2",
+                    f"{isize}-1",
+                    f"{isize}",
+                    f"{isize}+1",
+            )
     else:
-        xs = np.arange(0, size, 1) + 0.5
-        xs = np.append(0., xs)
-        xs = np.append(xs, size)
+        if is_periodic_x:
+            xs = np.arange(-1, size+1, 1) + 0.5
+        else:
+            xs = np.arange(0, size, 1) + 0.5
+            xs = np.append(0., xs)
+            xs = np.append(xs, size)
         xlabels = (
                 "0",
                 "1",
@@ -133,9 +158,9 @@ def get_xparams(is_face, size):
                 "i",
                 "i+1",
                 "dummy",
-                "isize-1",
-                "isize",
-                "isize+1",
+                f"{isize}-1",
+                f"{isize}",
+                f"{isize}+1",
         )
     return xs, xlabels
 
@@ -151,9 +176,9 @@ def get_yparams(is_face, size):
                 "j",
                 "j+1",
                 "dummy",
-                "jsize-1",
-                "jsize",
-                "jsize+1",
+                f"{jsize}-1",
+                f"{jsize}",
+                f"{jsize}+1",
         )
     else:
         ys = np.arange(0, size+3, 1) - 0.5
@@ -166,9 +191,9 @@ def get_yparams(is_face, size):
                 "j",
                 "j+1",
                 "dummy",
-                "jsize-1",
-                "jsize",
-                "jsize+1",
+                f"{jsize}-1",
+                f"{jsize}",
+                f"{jsize}+1",
         )
     return ys, ylabels
 
@@ -207,6 +232,8 @@ def staggered2(sizes):
     qus = np.full(qxs.shape, length)
     qvs = np.full(qxs.shape, 0.0)
     ax.quiver(qxs, qys, qus, qvs, scale=0.7, scale_units="x", color="#FF0000", zorder=10.)
+    if attach_cr:
+        ax.text(0.5 * sizes[0], 0.5 * sizes[1], **cr_config)
     abspath = os.path.realpath(__file__)
     dirname = os.path.dirname(abspath)
     filename = f"{dirname}/staggered2.png"
@@ -224,6 +251,8 @@ def staggered3(sizes):
     qus = np.full(qxs.shape, 0.0)
     qvs = np.full(qxs.shape, length)
     ax.quiver(qxs, qys, qus, qvs, scale=scale, scale_units="x", color="#0000FF", zorder=10.)
+    if attach_cr:
+        ax.text(0.5 * sizes[0], 0.5 * sizes[1], **cr_config)
     abspath = os.path.realpath(__file__)
     dirname = os.path.dirname(abspath)
     filename = f"{dirname}/staggered3.png"
@@ -238,6 +267,8 @@ def staggered4(sizes):
     attach_labels(ax, xs, ys, xlabels, ylabels)
     _, _, xs, ys = get_grid(xs, ys, xlabels, ylabels)
     ax.scatter(xs, ys, color="#000000", s=20.)
+    if attach_cr:
+        ax.text(0.5 * sizes[0], 0.5 * sizes[1], **cr_config)
     abspath = os.path.realpath(__file__)
     dirname = os.path.dirname(abspath)
     filename = f"{dirname}/staggered4.png"
@@ -246,6 +277,15 @@ def staggered4(sizes):
     pyplot.close()
 
 if __name__ == "__main__":
+    attach_cr = False
+    cr_config = {
+            "s": "© 2024, Naoki Hori",
+            "ha": "center",
+            "va": "center",
+            "size": "xx-large",
+            "rotation": 44.78236,
+            "color": "#aaaaaa",
+            }
     matplotlib.rcParams["lines.linewidth"] = 3
     matplotlib.rcParams["axes.linewidth"] = 5
     staggered1()
