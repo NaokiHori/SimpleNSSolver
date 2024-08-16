@@ -11,3 +11,7 @@ div.MathJax_Display {
   margin-top: 5px;
   margin-bottom: 5px;
 }
+
+a:visited {
+  color: #ffb494;
+}
