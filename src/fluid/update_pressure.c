@@ -172,7 +172,7 @@ int fluid_update_pressure (
   // explicit contribution, always present
   explicit_contribution(domain, fluid);
   const double prefactor =
-    0.5 * rkcoefs[rkstep][rk_g] * dt * fluid_compute_momentum_diffusivity(fluid);
+    0.5 * rkcoefs[rkstep].gamma * dt * fluid_compute_momentum_diffusivity(fluid);
   // additional terms if diffusive terms in the direction is treated implicitly
   if (param_m_implicit_x) {
     implicit_x_contribution(domain, prefactor, fluid);

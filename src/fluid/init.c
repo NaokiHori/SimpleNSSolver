@@ -38,14 +38,12 @@ static int allocate (
   // temperature
   if (0 != array.create(domain, T_NADDS, sizeof(double), &fluid->t)) return 1;
   // Runge-Kutta source terms
-  for (size_t n = 0; n < RKNBUFFERS; n++) {
-    if (0 != array.create(domain, SRCUX_NADDS, sizeof(double), fluid->srcux + n)) return 1;
-    if (0 != array.create(domain, SRCUY_NADDS, sizeof(double), fluid->srcuy + n)) return 1;
+  if (0 != rkbuffers_init(domain, SRCUX_NADDS, &fluid->srcux)) return 1;
+  if (0 != rkbuffers_init(domain, SRCUY_NADDS, &fluid->srcuy)) return 1;
 #if NDIMS == 3
-    if (0 != array.create(domain, SRCUZ_NADDS, sizeof(double), fluid->srcuz + n)) return 1;
+  if (0 != rkbuffers_init(domain, SRCUZ_NADDS, &fluid->srcuz)) return 1;
 #endif
-    if (0 != array.create(domain, SRCT_NADDS,  sizeof(double), fluid->srct  + n)) return 1;
-  }
+  if (0 != rkbuffers_init(domain, SRCT_NADDS,  &fluid->srct )) return 1;
   return 0;
 }
 

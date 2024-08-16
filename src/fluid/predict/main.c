@@ -1,28 +1,8 @@
-#include <string.h>
 #include "runge_kutta.h"
 #include "domain.h"
 #include "fluid.h"
 #include "fluid_solver.h"
 #include "internal.h"
-
-static int reset_srcs(
-    array_t * restrict srca,
-    array_t * restrict srcb,
-    array_t * restrict srcg
-){
-  // stash previous RK source term,
-  //   which is achieved by swapping
-  //   the pointers to "data"
-  double * tmp = srca->data;
-  srca->data = srcb->data;
-  srcb->data = tmp;
-  // zero-clear current RK source terms (exp/imp)
-  // NOTE: when 0 == rkstep, rkcoef for "beta" is zero
-  //   and thus zero-clearing"beta" buffers is not needed
-  memset(srca->data, 0, srca->datasize);
-  memset(srcg->data, 0, srcg->datasize);
-  return 0;
-}
 
 /**
  * @brief update fields using the previously-computed RK source terms
@@ -40,18 +20,18 @@ int fluid_predict_field(
 ){
   // reset buffers
   // copy previous k-step source term and reset | 14
-  if(0 != reset_srcs(fluid->srcux + rk_a, fluid->srcux + rk_b, fluid->srcux + rk_g)){
+  if (0 != rkbuffers_reset(&fluid->srcux)) {
     return 1;
   }
-  if(0 != reset_srcs(fluid->srcuy + rk_a, fluid->srcuy + rk_b, fluid->srcuy + rk_g)){
+  if (0 != rkbuffers_reset(&fluid->srcuy)) {
     return 1;
   }
 #if NDIMS == 3
-  if(0 != reset_srcs(fluid->srcuz + rk_a, fluid->srcuz + rk_b, fluid->srcuz + rk_g)){
+  if (0 != rkbuffers_reset(&fluid->srcuz)) {
     return 1;
   }
 #endif
-  if(0 != reset_srcs(fluid->srct  + rk_a, fluid->srct  + rk_b, fluid->srct  + rk_g)){
+  if (0 != rkbuffers_reset(&fluid->srct)) {
     return 1;
   }
   // compute right-hand-side terms and store them to the corresponding buffers

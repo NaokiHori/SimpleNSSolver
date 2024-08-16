@@ -303,9 +303,9 @@ int compute_rhs_t (
 #endif
   const double * restrict  t = fluid-> t.data;
   // buffer for explicit terms
-  double * restrict srca = fluid->srct[rk_a].data;
+  double * restrict srca = fluid->srct.alpha.data;
   // buffer for implicit terms
-  double * restrict srcg = fluid->srct[rk_g].data;
+  double * restrict srcg = fluid->srct.gamma.data;
   const double diffusivity = fluid_compute_temperature_diffusivity(fluid);
   // advective contributions, always explicit
   advection_x(domain, t, ux, srca);
@@ -356,13 +356,13 @@ int update_t (
   // compute increments | 28
   {
     // Runge-Kutta coefficients, alpha, beta, gamma
-    const double coef_a = rkcoefs[rkstep][rk_a];
-    const double coef_b = rkcoefs[rkstep][rk_b];
-    const double coef_g = rkcoefs[rkstep][rk_g];
+    const double coef_a = rkcoefs[rkstep].alpha;
+    const double coef_b = rkcoefs[rkstep].beta ;
+    const double coef_g = rkcoefs[rkstep].gamma;
     // Runge-Kutta buffers, alpha, beta, gamma
-    const double * restrict srcta = fluid->srct[rk_a].data;
-    const double * restrict srctb = fluid->srct[rk_b].data;
-    const double * restrict srctg = fluid->srct[rk_g].data;
+    const double * restrict srcta = fluid->srct.alpha.data;
+    const double * restrict srctb = fluid->srct.beta .data;
+    const double * restrict srctg = fluid->srct.gamma.data;
     const int isize = domain->mysizes[0];
     const int jsize = domain->mysizes[1];
 #if NDIMS == 3
@@ -385,7 +385,7 @@ int update_t (
   // solve linear systems if necessary
   {
     const double prefactor =
-      0.5 * rkcoefs[rkstep][rk_g] * dt * fluid_compute_temperature_diffusivity(fluid);
+      0.5 * rkcoefs[rkstep].gamma * dt * fluid_compute_temperature_diffusivity(fluid);
     // solve linear systems in x | 20
     if (param_t_implicit_x) {
       // prepare tri-diagonal coefficients

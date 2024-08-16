@@ -377,9 +377,9 @@ int compute_rhs_ux (
   const double * restrict  p = fluid-> p.data;
   const double * restrict  t = fluid-> t.data;
   // buffer for explicit terms
-  double * restrict srca = fluid->srcux[rk_a].data;
+  double * restrict srca = fluid->srcux.alpha.data;
   // buffer for implicit terms
-  double * restrict srcg = fluid->srcux[rk_g].data;
+  double * restrict srcg = fluid->srcux.gamma.data;
   const double diffusivity = fluid_compute_momentum_diffusivity(fluid);
   // advective contributions, always explicit
   advection_x(domain, ux,     srca);
@@ -433,12 +433,12 @@ int update_ux (
   }
   // compute increments | 25
   {
-    const double coef_a = rkcoefs[rkstep][rk_a];
-    const double coef_b = rkcoefs[rkstep][rk_b];
-    const double coef_g = rkcoefs[rkstep][rk_g];
-    const double * restrict srcuxa = fluid->srcux[rk_a].data;
-    const double * restrict srcuxb = fluid->srcux[rk_b].data;
-    const double * restrict srcuxg = fluid->srcux[rk_g].data;
+    const double coef_a = rkcoefs[rkstep].alpha;
+    const double coef_b = rkcoefs[rkstep].beta ;
+    const double coef_g = rkcoefs[rkstep].gamma;
+    const double * restrict srcuxa = fluid->srcux.alpha.data;
+    const double * restrict srcuxb = fluid->srcux.beta .data;
+    const double * restrict srcuxg = fluid->srcux.gamma.data;
     const int isize = domain->mysizes[0];
     const int jsize = domain->mysizes[1];
 #if NDIMS == 3
@@ -460,7 +460,7 @@ int update_ux (
   // solve linear systems if necessary
   {
     const double prefactor =
-      0.5 * rkcoefs[rkstep][rk_g] * dt * fluid_compute_momentum_diffusivity(fluid);
+      0.5 * rkcoefs[rkstep].gamma * dt * fluid_compute_momentum_diffusivity(fluid);
     // solve linear systems in x | 18
     if (param_m_implicit_x) {
       tdm_info_t * tdm_info = linear_system.tdm_x;

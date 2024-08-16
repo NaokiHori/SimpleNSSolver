@@ -19,7 +19,7 @@ int fluid_correct_velocity(
     fluid_t * fluid
 ){
   // compute prefactor gamma dt | 2
-  const double gamma = rkcoefs[rkstep][rk_g];
+  const double gamma = rkcoefs[rkstep].gamma;
   const double prefactor = gamma * dt;
   if(0 != fluid_correct_velocity_ux(domain, prefactor, fluid)) return 1;
   if(0 != fluid_correct_velocity_uy(domain, prefactor, fluid)) return 1;

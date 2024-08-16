@@ -482,7 +482,7 @@ static int assign_input (
 #else
   const double norm = 1. * domain->glsizes[1] * domain->glsizes[2];
 #endif
-  const double prefactor = 1. / (rkcoefs[rkstep][rk_g] * dt) / norm;
+  const double prefactor = 1. / (rkcoefs[rkstep].gamma * dt) / norm;
   BEGIN
     const double hx_xm = HXXF(i  );
     const double hx_xp = HXXF(i+1);

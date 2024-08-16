@@ -2,20 +2,19 @@
 #define FLUID_H
 
 #include "array.h"
+#include "runge_kutta.h"
 #include "domain.h"
 
-// definition of a structure fluid_t_ | 30
+// definition of a structure fluid_t | 28
 /**
  * @struct fluid_t
  * @brief struct storing fluid-related variables
- * @var ux, uy, uz   : velocity in each direction
- * @var p, psi       : pressure, scalar potential
- * @var t            : temperature
- * @var srcux        : Runge-Kutta source terms for ux
- * @var srcuy        : Runge-Kutta source terms for uy
- * @var srcuz        : Runge-Kutta source terms for uz
- * @var Ra, Pr       : non-dimensional parameters
- * @var m_dif, t_dif : momentum / temperature diffusivities
+ * @var u[x-z]    : velocity in each direction
+ * @var p, psi    : pressure, scalar potential
+ * @var t         : temperature
+ * @var srcu[x-z] : Runge-Kutta source terms for ux, uy, uz
+ * @var srct      : Runge-Kutta source terms for temperature
+ * @var Ra, Pr    : non-dimensional parameters
  */
 typedef struct {
   array_t ux;
@@ -26,27 +25,28 @@ typedef struct {
   array_t p;
   array_t psi;
   array_t t;
-  array_t srcux[3];
-  array_t srcuy[3];
+  rkbuffers_t srcux;
+  rkbuffers_t srcuy;
 #if NDIMS == 3
-  array_t srcuz[3];
+  rkbuffers_t srcuz;
 #endif
-  array_t srct[3];
-  double Ra, Pr;
+  rkbuffers_t srct;
+  double Ra;
+  double Pr;
 } fluid_t;
 
 // initialiser of fluid_t
-extern int fluid_init(
+extern int fluid_init (
     const char dirname_ic[],
-    const domain_t * domain,
-    fluid_t * fluid
+    const domain_t * const domain,
+    fluid_t * const fluid
 );
 
 // save flow field
-extern int fluid_save(
+extern int fluid_save (
     const char dirname[],
-    const domain_t * domain,
-    const fluid_t * fluid
+    const domain_t * const domain,
+    const fluid_t * const fluid
 );
 
 #endif // FLUID_H
