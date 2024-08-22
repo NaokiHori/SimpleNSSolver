@@ -218,6 +218,7 @@ and
    \left( \frac{0}{60}, -\frac{17}{60}, -\frac{25}{60} \right),
 
 following e.g., |RAI1991|, |VERZICCO1996|, |COSTA2018|.
+
 For later convenience, we also introduce
 
 .. math::
@@ -245,6 +246,10 @@ Note that, since we have
   1,
 
 the above three-step Runge-Kutta scheme is essentially a combination of three Euler-forward scheme with :math:`\gamma^k \Delta t` as time-step sizes.
+
+.. myliteralinclude:: /../../src/runge_kutta.c
+   :language: c
+   :tag: coefficients of three-stage Runge-Kutta scheme
 
 .. mydetails:: Proof of the second-order accuracy
 
