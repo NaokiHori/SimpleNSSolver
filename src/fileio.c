@@ -155,77 +155,91 @@ static int mkdir_(
 }
 
 // wrapper function of snpyio_r_header with error handling
-static size_t r_npy_header(
+static int r_npy_header(
     const char fname[],
     const size_t ndims,
     const size_t * shape,
     const char * dtype,
-    const bool is_fortran_order
+    const bool is_fortran_order,
+    size_t * header_size
 ){
+  int error_code = 0;
   const char msg[] = {"NPY header read failed"};
+  errno = 0;
   FILE * fp = fopen_(fname, "r");
   if(NULL == fp){
-    return 0;
+    perror(fname);
+    return 1;
   }
   // load header, return header size when succeeded, return 0 otherwise
   size_t ndims_ = 0;
   size_t * shape_ = NULL;
   char * dtype_ = NULL;
   bool is_fortran_order_ = false;
-  size_t header_size = snpyio_r_header(&ndims_, &shape_, &dtype_, &is_fortran_order_, fp);
+  *header_size = 0;
+  error_code = snpyio_r_header(&ndims_, &shape_, &dtype_, &is_fortran_order_, fp, header_size);
   fclose_(fp);
+  if (0 != error_code) {
+    fprintf(stderr, "%s(%s), snpyio_r_header failed\n", msg, fname);
+    goto err_hndl;
+  }
   // check arguments, return loaded header size when all OK, return 0 otherwise
   // ndims
   if(ndims != ndims_){
     fprintf(stderr, "%s(%s), ndims: %zu expected, %zu obtained\n", msg, fname, ndims, ndims_);
-    header_size = 0;
+    error_code = 1;
     goto err_hndl;
   }
   // shape (for each dimension)
   for(size_t n = 0; n < ndims; n++){
     if(shape[n] != shape_[n]){
       fprintf(stderr, "%s(%s), shape[%zu]: %zu expected, %zu obtained\n", msg, fname, n, shape[n], shape_[n]);
-      header_size = 0;
+      error_code = 1;
       goto err_hndl;
     }
   }
   // dtype
   if(0 != strcmp(dtype, dtype_)){
     fprintf(stderr, "%s(%s), dtype: %s expected, %s obtained\n", msg, fname, dtype, dtype_);
-    header_size = 0;
+    error_code = 1;
     goto err_hndl;
   }
   // is_fortran_order
   if(is_fortran_order != is_fortran_order_){
     fprintf(stderr, "%s(%s), is_fortran_order: %s expected, %s obtained\n", msg, fname, is_fortran_order ? "true" : "false", is_fortran_order_ ? "true" : "false");
-    header_size = 0;
+    error_code = 1;
     goto err_hndl;
   }
 err_hndl:
   memory_free(shape_);
   memory_free(dtype_);
-  return header_size;
+  return error_code;
 }
 
 // wrapper function of snpyio_w_header with error handling
-static size_t w_npy_header(
+static int w_npy_header(
     const char fname[],
     const size_t ndims,
     const size_t * shape,
     const char dtype[],
-    const bool is_fortran_order
+    const bool is_fortran_order,
+    size_t * header_size
 ){
+  int error_code = 0;
   const char msg[] = {"NPY header write failed"};
+  errno = 0;
   FILE * fp = fopen_(fname, "w");
   if(NULL == fp){
-    return 0;
+    perror(fname);
+    return 1;
   }
-  const size_t header_size = snpyio_w_header(ndims, shape, dtype, is_fortran_order, fp);
-  if(0 == header_size){
-    fprintf(stderr, "%s(%s)\n", msg, fname);
+  *header_size = 0;
+  error_code = snpyio_w_header(ndims, shape, dtype, is_fortran_order, fp, header_size);
+  if (0 != error_code) {
+    fprintf(stderr, "%s(%s) snpyio_w_header failed\n", msg, fname);
   }
   fclose_(fp);
-  return header_size;
+  return error_code;
 }
 
 /**
@@ -248,8 +262,8 @@ static int r_serial(
     void * data
 ){
   char * fname = create_npyfname(dirname, dsetname);
-  const size_t header_size = r_npy_header(fname, ndims, shape, dtype, false);
-  if(0 == header_size){
+  size_t header_size = 0;
+  if(0 != r_npy_header(fname, ndims, shape, dtype, false, &header_size)){
     fprintf(stderr, "%s: NPY header load failed\n", fname);
     memory_free(fname);
     return 1;
@@ -301,8 +315,8 @@ static int w_serial(
     const void * data
 ){
   char * fname = create_npyfname(dirname, dsetname);
-  const size_t header_size = w_npy_header(fname, ndims, shape, dtype, false);
-  if(0 == header_size){
+  size_t header_size = 0;
+  if(0 != w_npy_header(fname, ndims, shape, dtype, false, &header_size)){
     memory_free(fname);
     return 1;
   }
@@ -358,6 +372,7 @@ static int r_nd_parallel(
     const size_t size,
     void * data
 ){
+  int error_code = 0;
   const int root = 0;
   int myrank = root;
   MPI_Comm_rank(comm, &myrank);
@@ -370,18 +385,22 @@ static int r_nd_parallel(
     for(size_t dim = 0; dim < ndims; dim++){
       shape[dim] = (size_t)glsizes[dim];
     }
-    header_size = r_npy_header(fname, ndims, shape, dtype, false);
+    error_code = r_npy_header(fname, ndims, shape, dtype, false, &header_size);
     memory_free(shape);
   }
   // share result
+  MPI_Bcast(&error_code, sizeof(int), MPI_BYTE, root, comm);
   MPI_Bcast(&header_size, sizeof(size_t), MPI_BYTE, root, comm);
-  if(0 == header_size){
-    memory_free(fname);
-    return 1;
+  if(0 != error_code){
+    goto err_hndl;
   }
   // open file
   MPI_File fh = NULL;
-  if(0 != mpi_file_open(comm, fname, MPI_MODE_RDONLY, &fh)) return 1;
+  if (0 != mpi_file_open(comm, fname, MPI_MODE_RDONLY, &fh)) {
+    error_code = 1;
+    fprintf(stderr, "mpi_file_open failed");
+    goto err_hndl;
+  }
   // prepare file view
   MPI_Datatype basetype = MPI_BYTE;
   MPI_Datatype filetype = MPI_DATATYPE_NULL;
@@ -397,8 +416,9 @@ static int r_nd_parallel(
   destroy_view(&filetype);
   // close file
   MPI_File_close(&fh);
+err_hndl:
   memory_free(fname);
-  return 0;
+  return error_code;
 }
 
 /**
@@ -426,6 +446,7 @@ static int w_nd_parallel(
     const size_t size,
     const void * data
 ){
+  int error_code = 0;
   const int root = 0;
   int myrank = root;
   MPI_Comm_rank(comm, &myrank);
@@ -438,14 +459,14 @@ static int w_nd_parallel(
     for(size_t dim = 0; dim < ndims; dim++){
       shape[dim] = (size_t)glsizes[dim];
     }
-    header_size = w_npy_header(fname, ndims, shape, dtype, false);
+    error_code = w_npy_header(fname, ndims, shape, dtype, false, &header_size);
     memory_free(shape);
   }
   // share result
+  MPI_Bcast(&error_code, sizeof(int), MPI_BYTE, root, comm);
   MPI_Bcast(&header_size, sizeof(size_t), MPI_BYTE, root, comm);
-  if(0 == header_size){
-    memory_free(fname);
-    return 1;
+  if(0 != error_code){
+    goto err_hndl;
   }
   // open file
   MPI_File fh = NULL;
@@ -465,8 +486,9 @@ static int w_nd_parallel(
   destroy_view(&filetype);
   // close file
   MPI_File_close(&fh);
+err_hndl:
   memory_free(fname);
-  return 0;
+  return error_code;
 }
 
 const fileio_t fileio = {
