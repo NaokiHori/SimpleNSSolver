@@ -2,7 +2,7 @@
 #include "array.h"
 #include "runge_kutta.h"
 
-// coefficients of three-stage Runge-Kutta scheme | 8
+// coefficients of three-stage Runge-Kutta scheme
 static const double a0 = + 32. / 60., b0 =    0. / 60.;
 static const double a1 = + 25. / 60., b1 = - 17. / 60.;
 static const double a2 = + 45. / 60., b2 = - 25. / 60.;
