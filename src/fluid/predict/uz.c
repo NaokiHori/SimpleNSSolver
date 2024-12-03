@@ -1,4 +1,3 @@
-#if NDIMS == 3
 #include "param.h"
 #include "memory.h"
 #include "runge_kutta.h"
@@ -26,7 +25,7 @@ static laplacians_t laplacians = {
 static int init_laplacians (
     const domain_t * domain
 ) {
-  // vector laplacian in x | 15
+  // vector laplacian in x
   {
     const int isize = domain->glsizes[0];
     const double * hxxf = domain->hxxf;
@@ -42,7 +41,7 @@ static int init_laplacians (
       laplacians.LAPX(i).u = u;
     }
   }
-  // vector laplacian in y | 9
+  // vector laplacian in y
   {
     const double hy = domain->hy;
     const double l = 1. / hy / hy;
@@ -52,7 +51,7 @@ static int init_laplacians (
     laplacians.lapy.c = c;
     laplacians.lapy.u = u;
   }
-  // vector laplacian in z | 9
+  // vector laplacian in z
   {
     const double hz = domain->hz;
     const double l = 1. / hz / hz;
@@ -75,7 +74,7 @@ static int init_laplacians (
     } \
   }
 
-// advected in x | 33
+// advected in x
 static int advection_x (
     const domain_t * domain,
     const double * restrict uz,
@@ -110,7 +109,7 @@ static int advection_x (
   return 0;
 }
 
-// advected in y | 28
+// advected in y
 static int advection_y (
     const domain_t * domain,
     const double * restrict uz,
@@ -140,7 +139,7 @@ static int advection_y (
   return 0;
 }
 
-// advected in z | 27
+// advected in z
 static int advection_z (
     const domain_t * domain,
     const double * restrict uz,
@@ -169,7 +168,7 @@ static int advection_z (
   return 0;
 }
 
-// pressure gradient effect | 17
+// pressure gradient effect
 static int pressure (
     const domain_t * domain,
     const double * restrict p,
@@ -188,7 +187,7 @@ static int pressure (
   return 0;
 }
 
-// diffused in x | 19
+// diffused in x
 static int diffusion_x (
     const domain_t * domain,
     const double diffusivity,
@@ -209,7 +208,7 @@ static int diffusion_x (
   return 0;
 }
 
-// diffused in y | 19
+// diffused in y
 static int diffusion_y (
     const domain_t * domain,
     const double diffusivity,
@@ -230,7 +229,7 @@ static int diffusion_y (
   return 0;
 }
 
-// diffused in z | 19
+// diffused in z
 static int diffusion_z (
     const domain_t * domain,
     const double diffusivity,
@@ -251,7 +250,7 @@ static int diffusion_z (
   return 0;
 }
 
-// compute right-hand-side terms, which are added to buffers | 30
+// compute right-hand-side terms, which are added to buffers
 int compute_rhs_uz (
     const domain_t * domain,
     fluid_t * fluid
@@ -310,7 +309,7 @@ int update_uz (
       return 1;
     }
   }
-  // compute increments | 19
+  // compute increments
   {
     const double coef_a = rkcoefs[rkstep].alpha;
     const double coef_b = rkcoefs[rkstep].beta ;
@@ -334,7 +333,7 @@ int update_uz (
   {
     const double prefactor =
       0.5 * rkcoefs[rkstep].gamma * dt * fluid_compute_momentum_diffusivity(fluid);
-    // solve linear systems in x | 18
+    // solve linear systems in x
     if (param_m_implicit_x) {
       tdm_info_t * tdm_info = linear_system.tdm_x;
       int size = 0;
@@ -353,7 +352,7 @@ int update_uz (
       }
       tdm.solve(tdm_info, linear_system.x1pncl);
     }
-    // solve linear systems in y | 28
+    // solve linear systems in y
     if (param_m_implicit_y) {
       sdecomp.transpose.execute(
           linear_system.transposer_x1_to_y1,
@@ -382,7 +381,7 @@ int update_uz (
           linear_system.x1pncl
       );
     }
-    // solve linear systems in z | 28
+    // solve linear systems in z
     if (param_m_implicit_z) {
       sdecomp.transpose.execute(
           linear_system.transposer_x1_to_z2,
@@ -412,7 +411,7 @@ int update_uz (
       );
     }
   }
-  // update velocity field | 13
+  // update velocity field
   {
     const int isize = domain->mysizes[0];
     const int jsize = domain->mysizes[1];
@@ -428,4 +427,3 @@ int update_uz (
   }
   return 0;
 }
-#endif

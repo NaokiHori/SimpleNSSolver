@@ -4,10 +4,8 @@
 #include <float.h>
 #include <assert.h>
 #include <mpi.h>
-#if NDIMS == 3
 #include <fftw3.h>
 #include "timer.h"
-#endif
 #include "sdecomp.h"
 #include "memory.h"
 #include "domain.h"
@@ -79,7 +77,6 @@ int domain_save(
   return 0;
 }
 
-#if NDIMS == 3
 static int get_ndigits(
     int num
 ){
@@ -250,9 +247,8 @@ static int optimise_sdecomp_init(
   }
   return 0;
 }
-#endif
 
-// x scale factors at x cell faces | 10
+// x scale factors at x cell faces
 static double * allocate_and_init_hxxf (
     const int isize,
     const double * xc
@@ -264,7 +260,7 @@ static double * allocate_and_init_hxxf (
   return hxxf;
 }
 
-// x scale factors at x cell centers | 10
+// x scale factors at x cell centers
 static double * allocate_and_init_hxxc (
     const int isize,
     const double * xf
@@ -276,46 +272,30 @@ static double * allocate_and_init_hxxc (
   return hxxc;
 }
 
-// jacobian determinants at x cell faces | 20
+// jacobian determinants at x cell faces
 static double * allocate_and_init_jdxf (
     const int isize,
     const double * hxxf,
-#if NDIMS == 2
-    const double hy
-#else
     const double hy,
     const double hz
-#endif
 ) {
   double * jdxf = memory_calloc(isize + 1, sizeof(double));
   for (int i = 1; i <= isize + 1; i++) {
-#if NDIMS == 2
-    JDXF(i  ) = HXXF(i  ) * hy;
-#else
     JDXF(i  ) = HXXF(i  ) * hy * hz;
-#endif
   }
   return jdxf;
 }
 
-// jacobian determinants at x cell centers | 20
+// jacobian determinants at x cell centers
 static double * allocate_and_init_jdxc (
     const int isize,
     const double * hxxc,
-#if NDIMS == 2
-    const double hy
-#else
     const double hy,
     const double hz
-#endif
 ) {
   double * jdxc = memory_calloc(isize, sizeof(double));
   for (int i = 1; i <= isize; i++) {
-#if NDIMS == 2
-    JDXC(i  ) = HXXC(i  ) * hy;
-#else
     JDXC(i  ) = HXXC(i  ) * hy * hz;
-#endif
   }
   return jdxc;
 }
@@ -359,48 +339,29 @@ int domain_init(
   double * restrict * hxxf  = &domain->hxxf;
   double * restrict * hxxc  = &domain->hxxc;
   double * restrict   hy    = &domain->hy;
-#if NDIMS == 3
   double * restrict   hz    = &domain->hz;
-#endif
   double * restrict * jdxf  = &domain->jdxf;
   double * restrict * jdxc  = &domain->jdxc;
-  // load spatial information | 3
+  // load spatial information
   if(0 != domain_load(dirname_ic, domain)){
     return 1;
   }
   // allocate and initialise scale factors
   *hxxf = allocate_and_init_hxxf(glsizes[0], *xc);
   *hxxc = allocate_and_init_hxxc(glsizes[0], *xf);
-  // y scale factor | 1
+  // y scale factor
   *hy = lengths[1] / glsizes[1];
-#if NDIMS == 3
-  // z scale factor | 1
+  // z scale factor
   *hz = lengths[2] / glsizes[2];
-#endif
   // allocate and initialise Jacobian determinants
-#if NDIMS == 2
-  *jdxf = allocate_and_init_jdxf(glsizes[0], *hxxf, *hy);
-  *jdxc = allocate_and_init_jdxc(glsizes[0], *hxxc, *hy);
-#else
   *jdxf = allocate_and_init_jdxf(glsizes[0], *hxxf, *hy, *hz);
   *jdxc = allocate_and_init_jdxc(glsizes[0], *hxxc, *hy, *hz);
-#endif
-  // initialise sdecomp to distribute the domain | 14
-#if NDIMS == 2
-  if(0 != sdecomp.construct(
-        MPI_COMM_WORLD,
-        NDIMS,
-        (size_t [NDIMS]){0, 0},
-        (bool [NDIMS]){false, true},
-        info
-  )) return 1;
-#else
+  // initialise sdecomp to distribute the domain
   if(0 != optimise_sdecomp_init(
         glsizes,
         info
   )) return 1;
-#endif
-  // local array sizes and offsets | 4
+  // local array sizes and offsets
   for(size_t dim = 0; dim < NDIMS; dim++){
     sdecomp.get_pencil_mysize(*info, SDECOMP_X1PENCIL, dim, glsizes[dim], mysizes + dim);
     sdecomp.get_pencil_offset(*info, SDECOMP_X1PENCIL, dim, glsizes[dim], offsets + dim);

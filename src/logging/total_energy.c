@@ -5,9 +5,7 @@
 #include "array_macros/domain/jdxc.h"
 #include "array_macros/fluid/ux.h"
 #include "array_macros/fluid/uy.h"
-#if NDIMS == 3
 #include "array_macros/fluid/uz.h"
-#endif
 #include "array_macros/fluid/t.h"
 #include "internal.h"
 
@@ -32,27 +30,16 @@ int logging_check_total_energy(
   sdecomp.get_comm_cart(domain->info, &comm_cart);
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   const double * restrict jdxf = domain->jdxf;
   const double * restrict jdxc = domain->jdxc;
   const double * restrict ux = fluid->ux.data;
   const double * restrict uy = fluid->uy.data;
-#if NDIMS == 3
   const double * restrict uz = fluid->uz.data;
-#endif
   const double * restrict t = fluid->t.data;
   // velocity for each dimension and scalar
   double quantities[NDIMS + 1] = {0.};
   // compute quadratic quantity in x direction
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 2; i <= isize; i++) {
-      quantities[0] += JDXF(i  ) * 0.5 * pow(UX(i, j), 2.);
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 2; i <= isize; i++) {
@@ -60,15 +47,7 @@ int logging_check_total_energy(
       }
     }
   }
-#endif
   // compute quadratic quantity in y direction
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 1; i <= isize; i++) {
-      quantities[1] += JDXC(i  ) * 0.5 * pow(UY(i, j), 2.);
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 1; i <= isize; i++) {
@@ -76,8 +55,6 @@ int logging_check_total_energy(
       }
     }
   }
-#endif
-#if NDIMS == 3
   // compute quadratic quantity in z direction
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
@@ -86,15 +63,7 @@ int logging_check_total_energy(
       }
     }
   }
-#endif
   // compute quadratic quantity of scalar
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 1; i <= isize; i++) {
-      quantities[NDIMS] += JDXC(i  ) * 0.5 * pow(T(i, j), 2.);
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 1; i <= isize; i++) {
@@ -102,7 +71,6 @@ int logging_check_total_energy(
       }
     }
   }
-#endif
   // output information
   const size_t nitems = sizeof(quantities) / sizeof(quantities[0]);
   const void * sendbuf = root == myrank ? MPI_IN_PLACE : quantities;
