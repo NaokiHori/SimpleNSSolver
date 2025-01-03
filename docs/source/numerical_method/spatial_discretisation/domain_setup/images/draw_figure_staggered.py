@@ -279,13 +279,13 @@ def staggered4(sizes):
 if __name__ == "__main__":
     attach_cr = False
     cr_config = {
-            "s": "© 2024, Naoki Hori",
-            "ha": "center",
-            "va": "center",
-            "size": "xx-large",
-            "rotation": 44.78236,
-            "color": "#aaaaaa",
-            }
+        "s": "© 2024, Naoki Hori",
+        "ha": "center",
+        "va": "center",
+        "size": "xx-large",
+        "rotation": 44.78236,
+        "color": "#aaaaaa",
+    }
     matplotlib.rcParams["lines.linewidth"] = 3
     matplotlib.rcParams["axes.linewidth"] = 5
     staggered1()
