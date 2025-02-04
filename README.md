@@ -208,7 +208,7 @@ Feel free to ask questions, report bugs, suggest new features, polish documentat
 
 Despite its title, this library is not as simple as it may seem, primarily due to process parallelisation and its support for both two-dimensional and three-dimensional domains.
 Additionally, adding new features to this solver is challenging due to the many factors that must be taken into account, such as grid size varying from process to process, implicit time marcher, Runge-Kutta method.
-To address these challenges, I have developed [another library](https://github.com/NaokiHori/NS-Sandbox) that is better suited for quickly testing new ideas and features.
+To address these challenges, I have developed [another library](https://github.com/NaokiHori/VerySimpleNSSolver) that is better suited for quickly testing new ideas and features.
 
 ## Acknowledgements
 
