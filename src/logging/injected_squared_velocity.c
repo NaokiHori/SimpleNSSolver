@@ -5,23 +5,12 @@
 #include "array_macros/fluid/t.h"
 #include "internal.h"
 
-#if NDIMS == 2
 #define BEGIN \
   for (int j = 1; j <= jsize; j++) { \
     for (int i = 2; i <= isize; i++) {
 #define END \
     } \
   }
-#else
-#define BEGIN \
-  for (int k = 1; k <= ksize; k++) { \
-    for (int j = 1; j <= jsize; j++) { \
-      for (int i = 2; i <= isize; i++) {
-#define END \
-      } \
-    } \
-  }
-#endif
 
 /**
  * @brief compute injected squared velocity
@@ -44,27 +33,17 @@ int logging_check_injected_squared_velocity (
   sdecomp.get_comm_cart(domain->info, &comm_cart);
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
-  const int ksize = domain->mysizes[2];
-#endif
   const double * restrict jdxf = domain->jdxf;
   const double * restrict ux = fluid->ux.data;
   const double * restrict  t = fluid-> t.data;
-  // compute injected squared velocity | 19
+  // compute injected squared velocity
   double quantity = 0.;
   BEGIN
     const double jd_x0 = JDXF(i);
-#if NDIMS == 2
     const double ux_x0 = UX(i, j);
     const double  t_x0 =
       + 0.5 * T(i-1, j  )
       + 0.5 * T(i  , j  );
-#else
-    const double ux_x0 = UX(i, j, k);
-    const double  t_x0 =
-      + 0.5 * T(i-1, j  , k  )
-      + 0.5 * T(i  , j  , k  );
-#endif
     quantity += jd_x0 * ux_x0 * t_x0;
   END
   const void * sendbuf = root == myrank ? MPI_IN_PLACE : &quantity;

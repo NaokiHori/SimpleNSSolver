@@ -23,13 +23,13 @@ int main (
     int argc,
     char * argv[]
 ) {
-  // launch MPI, start timer | 5
+  // launch MPI, start timer
   MPI_Init(NULL, NULL);
   const int root = 0;
   int myrank = root;
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
   const double tic = timer();
-  // find name of directory where IC is stored | 7
+  // find name of directory where IC is stored
   if (2 != argc) {
     if (root == myrank) {
       printf("directory name should be given as input\n");
@@ -41,7 +41,7 @@ int main (
   if (0 != fileio.init()) {
     goto abort;
   }
-  // initialise time step and time units | 8
+  // initialise time step and time units
   size_t step = 0;
   if (0 != fileio.r_serial(dirname_ic, "step", 0, NULL, fileio.npy_size_t, sizeof(size_t), &step)) {
     goto abort;
@@ -50,7 +50,7 @@ int main (
   if (0 != fileio.r_serial(dirname_ic, "time", 0, NULL, fileio.npy_double, sizeof(double), &time)) {
     goto abort;
   }
-  // initialise structures | 8
+  // initialise structures
   domain_t domain = {0};
   if (0 != domain_init(dirname_ic, &domain)) {
     goto abort;
@@ -59,7 +59,7 @@ int main (
   if (0 != fluid_init(dirname_ic, &domain, &fluid)) {
     goto abort;
   }
-  // initialise auxiliary objects | 9
+  // initialise auxiliary objects
   if (0 != logging.init(&domain, time)) {
     goto abort;
   }
@@ -90,11 +90,11 @@ int main (
     if (0 != integrate(&domain, &fluid, &dt)) {
       goto abort;
     }
-    // update step and simulation / wall time | 3
+    // update step and simulation / wall time
     step += 1;
     time += dt;
     const double toc = timer();
-    // terminate if one of the following conditions is met | 8
+    // terminate if one of the following conditions is met
     // the simulation is finished
     if (timemax < time) {
       break;
@@ -103,25 +103,25 @@ int main (
     if (wtimemax < toc - tic) {
       break;
     }
-    // compute and output log regularly | 3
+    // compute and output log regularly
     if (logging.get_next_time() < time) {
       logging.check_and_output(&domain, step, time, dt, toc - tic, &fluid);
     }
-    // save flow fields regularly | 3
+    // save flow fields regularly
     if (save.get_next_time() < time) {
       save.output(&domain, step, time, &fluid);
     }
-    // collect statistics regularly | 3
+    // collect statistics regularly
     if (statistics.get_next_time() < time) {
       statistics.collect(&domain, &fluid);
     }
   }
   // finalisation
-  // save final flow fields | 1
+  // save final flow fields
   save.output(&domain, step, time, &fluid);
-  // save collected statistics | 1
+  // save collected statistics
   statistics.output(&domain, step);
-  // finalise MPI | 2
+  // finalise MPI
 abort:
   MPI_Finalize();
   return 0;

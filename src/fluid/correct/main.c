@@ -18,14 +18,11 @@ int fluid_correct_velocity(
     const double dt,
     fluid_t * fluid
 ){
-  // compute prefactor gamma dt | 2
+  // compute prefactor gamma dt
   const double gamma = rkcoefs[rkstep].gamma;
   const double prefactor = gamma * dt;
   if(0 != fluid_correct_velocity_ux(domain, prefactor, fluid)) return 1;
   if(0 != fluid_correct_velocity_uy(domain, prefactor, fluid)) return 1;
-#if NDIMS == 3
-  if(0 != fluid_correct_velocity_uz(domain, prefactor, fluid)) return 1;
-#endif
   return 0;
 }
 

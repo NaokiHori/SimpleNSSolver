@@ -111,7 +111,7 @@ GTSV(fftw_complex)
 TDM_SOLVE(double)
 TDM_SOLVE(fftw_complex)
 
-// definition of tdm_info_t_ | 22
+// definition of tdm_info_t_
 /**
  * @struct tdm_info_t_
  * @brief struct to keep information about tri-diagonal system and internal buffers

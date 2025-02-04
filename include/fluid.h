@@ -5,7 +5,7 @@
 #include "runge_kutta.h"
 #include "domain.h"
 
-// definition of a structure fluid_t | 28
+// definition of a structure fluid_t
 /**
  * @struct fluid_t
  * @brief struct storing fluid-related variables
@@ -19,17 +19,11 @@
 typedef struct {
   array_t ux;
   array_t uy;
-#if NDIMS == 3
-  array_t uz;
-#endif
   array_t p;
   array_t psi;
   array_t t;
   rkbuffers_t srcux;
   rkbuffers_t srcuy;
-#if NDIMS == 3
-  rkbuffers_t srcuz;
-#endif
   rkbuffers_t srct;
   double Ra;
   double Pr;
