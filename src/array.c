@@ -71,17 +71,11 @@ static int get_index(
     const int nadds[NDIMS][2],
     const int indices[NDIMS]
 ){
-#if NDIMS == 2
-  const int index =
-    +  indices[0]
-    + (indices[1] + nadds[1][0]) * (mysizes[0] + nadds[0][0] + nadds[0][1]);
-#else
   const int index =
     +  indices[0]
     + (indices[1] + nadds[1][0]) * (mysizes[0] + nadds[0][0] + nadds[0][1])
     + (indices[2] + nadds[2][0]) * (mysizes[0] + nadds[0][0] + nadds[0][1])
                                  * (mysizes[1] + nadds[1][0] + nadds[1][1]);
-#endif
   return index;
 }
 
@@ -98,24 +92,15 @@ static int load(
   const int nadds[NDIMS][2] = {
     {array->nadds[0][0], array->nadds[0][1]},
     {array->nadds[1][0], array->nadds[1][1]},
-#if NDIMS == 3
     {array->nadds[2][0], array->nadds[2][1]},
-#endif
   };
   const size_t size = array->size;
   char * data = array->data;
   // prepare a buffer
-#if NDIMS == 2
-  char * buf = memory_calloc(
-      (mysizes[0] + nadds[0][0] + nadds[0][1]) * mysizes[1],
-      size
-  );
-#else
   char * buf = memory_calloc(
       (mysizes[0] + nadds[0][0] + nadds[0][1]) * mysizes[1] * mysizes[2],
       size
   );
-#endif
   // read
   MPI_Comm comm_cart = MPI_COMM_NULL;
   sdecomp.get_comm_cart(domain->info, &comm_cart);
@@ -125,23 +110,17 @@ static int load(
       dsetname,
       NDIMS,
       (int [NDIMS]){
-#if NDIMS == 3
         glsizes[2],
-#endif
         glsizes[1],
         glsizes[0] + nadds[0][0] + nadds[0][1],
       },
       (int [NDIMS]){
-#if NDIMS == 3
         mysizes[2],
-#endif
         mysizes[1],
         mysizes[0] + nadds[0][0] + nadds[0][1],
       },
       (int [NDIMS]){
-#if NDIMS == 3
         offsets[2],
-#endif
         offsets[1],
         offsets[0],
       },
@@ -154,20 +133,6 @@ static int load(
     return 1;
   }
   // copy
-#if NDIMS == 2
-  const int imax = mysizes[0] + nadds[0][0] + nadds[0][1];
-  const int jmax = mysizes[1];
-  for(int cnt = 0, j = 0; j < jmax; j++){
-    for(int i = 0; i < imax; i++, cnt++){
-      const int index = get_index(
-          (int [NDIMS]){mysizes[0], mysizes[1]},
-          nadds,
-          (int [NDIMS]){i, j}
-      );
-      memcpy(data + size * index, buf + size * cnt, size);
-    }
-  }
-#else
   const int imax = mysizes[0] + nadds[0][0] + nadds[0][1];
   const int jmax = mysizes[1];
   const int kmax = mysizes[2];
@@ -183,7 +148,6 @@ static int load(
       }
     }
   }
-#endif
   memory_free(buf);
   return 0;
 }
@@ -201,39 +165,16 @@ static int dump(
   const int nadds[NDIMS][2] = {
     {array->nadds[0][0], array->nadds[0][1]},
     {array->nadds[1][0], array->nadds[1][1]},
-#if NDIMS == 3
     {array->nadds[2][0], array->nadds[2][1]},
-#endif
   };
   const size_t size = array->size;
   const char * data = array->data;
   // prepare a buffer
-#if NDIMS == 2
-  char * buf = memory_calloc(
-      (mysizes[0] + nadds[0][0] + nadds[0][1]) * mysizes[1],
-      size
-  );
-#else
   char * buf = memory_calloc(
       (mysizes[0] + nadds[0][0] + nadds[0][1]) * mysizes[1] * mysizes[2],
       size
   );
-#endif
   // copy
-#if NDIMS == 2
-  const int imax = mysizes[0] + nadds[0][0] + nadds[0][1];
-  const int jmax = mysizes[1];
-  for(int cnt = 0, j = 0; j < jmax; j++){
-    for(int i = 0; i < imax; i++, cnt++){
-      const int index = get_index(
-          (int [NDIMS]){mysizes[0], mysizes[1]},
-          nadds,
-          (int [NDIMS]){i, j}
-      );
-      memcpy(buf + size * cnt, data + size * index, size);
-    }
-  }
-#else
   const int imax = mysizes[0] + nadds[0][0] + nadds[0][1];
   const int jmax = mysizes[1];
   const int kmax = mysizes[2];
@@ -249,7 +190,6 @@ static int dump(
       }
     }
   }
-#endif
   // write
   MPI_Comm comm_cart = MPI_COMM_NULL;
   sdecomp.get_comm_cart(domain->info, &comm_cart);
@@ -259,23 +199,17 @@ static int dump(
       dsetname,
       NDIMS,
       (int [NDIMS]){
-#if NDIMS == 3
         glsizes[2],
-#endif
         glsizes[1],
         glsizes[0] + nadds[0][0] + nadds[0][1],
       },
       (int [NDIMS]){
-#if NDIMS == 3
         mysizes[2],
-#endif
         mysizes[1],
         mysizes[0] + nadds[0][0] + nadds[0][1],
       },
       (int [NDIMS]){
-#if NDIMS == 3
         offsets[2],
-#endif
         offsets[1],
         offsets[0],
       },

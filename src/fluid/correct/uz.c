@@ -1,4 +1,3 @@
-#if NDIMS == 3
 #include "domain.h"
 #include "fluid.h"
 #include "fluid_solver.h"
@@ -6,7 +5,7 @@
 #include "array_macros/fluid/uz.h"
 #include "array_macros/fluid/psi.h"
 
-// correct z velocity | 29
+// correct z velocity
 int fluid_correct_velocity_uz (
     const domain_t * domain,
     const double prefactor,
@@ -36,4 +35,3 @@ int fluid_correct_velocity_uz (
   }
   return 0;
 }
-#endif

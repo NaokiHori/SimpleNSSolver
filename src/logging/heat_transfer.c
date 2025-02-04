@@ -6,19 +6,12 @@
 #include "array_macros/fluid/t.h"
 #include "internal.h"
 
-#if NDIMS == 2
-#define BEGIN \
-  for (int j = 1; j <= jsize; j++) {
-#define END \
-  }
-#else
 #define BEGIN \
   for (int k = 1; k <= ksize; k++) { \
     for (int j = 1; j <= jsize; j++) {
 #define END \
     } \
   }
-#endif
 
 /**
  * @brief compute net heat transfer on the walls
@@ -41,13 +34,11 @@ int logging_check_heat_transfer (
   sdecomp.get_comm_cart(domain->info, &comm_cart);
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   const double * restrict hxxf = domain->hxxf;
   const double * restrict jdxf = domain->jdxf;
   const double * restrict t = fluid->t.data;
-  // compute heat transfer on the walls | 22
+  // compute heat transfer on the walls
   const double diffusivity = fluid_compute_temperature_diffusivity(fluid);
   // on the bottom and top walls
   double energies[2] = {0., 0.};
@@ -56,13 +47,8 @@ int logging_check_heat_transfer (
     const double hx_xp = HXXF(isize + 1);
     const double jd_xm = JDXF(        1);
     const double jd_xp = JDXF(isize + 1);
-#if NDIMS == 2
-    const double dt_xm = - T(    0, j) + T(        1, j);
-    const double dt_xp = - T(isize, j) + T(isize + 1, j);
-#else
     const double dt_xm = - T(    0, j, k) + T(        1, j, k);
     const double dt_xp = - T(isize, j, k) + T(isize + 1, j, k);
-#endif
     energies[0] -= diffusivity * jd_xm / hx_xm / hx_xm * dt_xm;
     energies[1] -= diffusivity * jd_xp / hx_xp / hx_xp * dt_xp;
   END

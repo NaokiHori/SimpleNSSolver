@@ -14,18 +14,14 @@
 #include "array_macros/domain/jdxf.h"
 #include "array_macros/fluid/ux.h"
 #include "array_macros/fluid/uy.h"
-#if NDIMS == 3
 #include "array_macros/fluid/uz.h"
-#endif
 #include "array_macros/fluid/t.h"
 #include "array_macros/statistics/ux1.h"
 #include "array_macros/statistics/ux2.h"
 #include "array_macros/statistics/uy1.h"
 #include "array_macros/statistics/uy2.h"
-#if NDIMS == 3
 #include "array_macros/statistics/uz1.h"
 #include "array_macros/statistics/uz2.h"
-#endif
 #include "array_macros/statistics/t1.h"
 #include "array_macros/statistics/t2.h"
 #include "array_macros/statistics/adv.h"
@@ -49,10 +45,8 @@ static array_t g_ux1 = {0};
 static array_t g_ux2 = {0};
 static array_t g_uy1 = {0};
 static array_t g_uy2 = {0};
-#if NDIMS == 3
 static array_t g_uz1 = {0};
 static array_t g_uz2 = {0};
-#endif
 static array_t g_t1 = {0};
 static array_t g_t2 = {0};
 static array_t g_adv = {0};
@@ -89,10 +83,8 @@ static int init (
   if (0 != array.create(domain, UX2_NADDS, sizeof(double), &g_ux2)) return 1;
   if (0 != array.create(domain, UY1_NADDS, sizeof(double), &g_uy1)) return 1;
   if (0 != array.create(domain, UY2_NADDS, sizeof(double), &g_uy2)) return 1;
-#if NDIMS == 3
   if (0 != array.create(domain, UZ1_NADDS, sizeof(double), &g_uz1)) return 1;
   if (0 != array.create(domain, UZ2_NADDS, sizeof(double), &g_uz2)) return 1;
-#endif
   if (0 != array.create(domain, T1_NADDS,  sizeof(double), &g_t1 )) return 1;
   if (0 != array.create(domain, T2_NADDS,  sizeof(double), &g_t2 )) return 1;
   if (0 != array.create(domain, ADV_NADDS, sizeof(double), &g_adv)) return 1;
@@ -124,19 +116,9 @@ static void collect_mean_ux (
 ) {
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   double * restrict ux1 = g_ux1.data;
   double * restrict ux2 = g_ux2.data;
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 1; i <= isize + 1; i++) {
-      UX1(i, j) += pow(UX(i, j), 1.);
-      UX2(i, j) += pow(UX(i, j), 2.);
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 1; i <= isize + 1; i++) {
@@ -145,7 +127,6 @@ static void collect_mean_ux (
       }
     }
   }
-#endif
 }
 
 static void collect_mean_uy (
@@ -154,19 +135,9 @@ static void collect_mean_uy (
 ) {
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   double * restrict uy1 = g_uy1.data;
   double * restrict uy2 = g_uy2.data;
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 0; i <= isize + 1; i++) {
-      UY1(i, j) += pow(UY(i, j), 1.);
-      UY2(i, j) += pow(UY(i, j), 2.);
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 0; i <= isize + 1; i++) {
@@ -175,10 +146,8 @@ static void collect_mean_uy (
       }
     }
   }
-#endif
 }
 
-#if NDIMS == 3
 static void collect_mean_uz (
     const domain_t * domain,
     const double * restrict uz
@@ -197,7 +166,6 @@ static void collect_mean_uz (
     }
   }
 }
-#endif
 
 static void collect_mean_t (
     const domain_t * domain,
@@ -205,19 +173,9 @@ static void collect_mean_t (
 ) {
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   double * restrict t1 = g_t1.data;
   double * restrict t2 = g_t2.data;
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 0; i <= isize + 1; i++) {
-      T1(i, j) += pow(T(i, j), 1.);
-      T2(i, j) += pow(T(i, j), 2.);
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 0; i <= isize + 1; i++) {
@@ -226,7 +184,6 @@ static void collect_mean_t (
       }
     }
   }
-#endif
 }
 
 static void collect_adv (
@@ -236,19 +193,10 @@ static void collect_adv (
 ) {
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   const double * restrict hxxf = domain->hxxf;
   const double * restrict jdxf = domain->jdxf;
   double * restrict adv = g_adv.data;
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 1; i <= isize + 1; i++) {
-      ADV(i, j) += JDXF(i) / HXXF(i) * UX(i, j) * (0.5 * T(i-1, j  ) + 0.5 * T(i  , j  ));
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 1; i <= isize + 1; i++) {
@@ -256,7 +204,6 @@ static void collect_adv (
       }
     }
   }
-#endif
 }
 
 static void collect_dif (
@@ -266,21 +213,10 @@ static void collect_dif (
 ) {
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
-#if NDIMS == 3
   const int ksize = domain->mysizes[2];
-#endif
   const double * restrict hxxf = domain->hxxf;
   const double * restrict jdxf = domain->jdxf;
   double * restrict dif = g_dif.data;
-#if NDIMS == 2
-  for (int j = 1; j <= jsize; j++) {
-    for (int i = 1; i <= isize + 1; i++) {
-      const double t_xm = T(i-1, j  );
-      const double t_xp = T(i  , j  );
-      DIF(i, j) -= diffusivity * JDXF(i) / HXXF(i) / HXXF(i) * (t_xp - t_xm);
-    }
-  }
-#else
   for (int k = 1; k <= ksize; k++) {
     for (int j = 1; j <= jsize; j++) {
       for (int i = 1; i <= isize + 1; i++) {
@@ -290,7 +226,6 @@ static void collect_dif (
       }
     }
   }
-#endif
 }
 
 /**
@@ -306,9 +241,7 @@ static int collect (
   // collect temporally-averaged quantities
   collect_mean_ux(domain, fluid->ux.data);
   collect_mean_uy(domain, fluid->uy.data);
-#if NDIMS == 3
   collect_mean_uz(domain, fluid->uz.data);
-#endif
   collect_mean_t(domain, fluid->t.data);
   collect_adv(domain, fluid->ux.data, fluid->t.data);
   collect_dif(domain, fluid_compute_temperature_diffusivity(fluid), fluid->t.data);
@@ -369,10 +302,8 @@ static int output(
     {.name = "ux2", .array = &g_ux2},
     {.name = "uy1", .array = &g_uy1},
     {.name = "uy2", .array = &g_uy2},
-#if NDIMS == 3
     {.name = "uz1", .array = &g_uz1},
     {.name = "uz2", .array = &g_uz2},
-#endif
     {.name = "t1",  .array = &g_t1 },
     {.name = "t2",  .array = &g_t2 },
     {.name = "adv", .array = &g_adv},

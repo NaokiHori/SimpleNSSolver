@@ -19,18 +19,16 @@ int fluid_predict_field(
     fluid_t * fluid
 ){
   // reset buffers
-  // copy previous k-step source term and reset | 14
+  // copy previous k-step source term and reset
   if (0 != rkbuffers_reset(&fluid->srcux)) {
     return 1;
   }
   if (0 != rkbuffers_reset(&fluid->srcuy)) {
     return 1;
   }
-#if NDIMS == 3
   if (0 != rkbuffers_reset(&fluid->srcuz)) {
     return 1;
   }
-#endif
   if (0 != rkbuffers_reset(&fluid->srct)) {
     return 1;
   }
@@ -41,11 +39,9 @@ int fluid_predict_field(
   if(0 != compute_rhs_uy(domain, fluid)){
     return 1;
   }
-#if NDIMS == 3
   if(0 != compute_rhs_uz(domain, fluid)){
     return 1;
   }
-#endif
   if(0 != compute_rhs_t (domain, fluid)){
     return 1;
   }
@@ -56,11 +52,9 @@ int fluid_predict_field(
   if(0 != update_uy(domain, rkstep, dt, fluid)){
     return 1;
   }
-#if NDIMS == 3
   if(0 != update_uz(domain, rkstep, dt, fluid)){
     return 1;
   }
-#endif
   if(0 != update_t (domain, rkstep, dt, fluid)){
     return 1;
   }

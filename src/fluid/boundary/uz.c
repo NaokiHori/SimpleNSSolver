@@ -1,4 +1,3 @@
-#if NDIMS == 3
 #include "param.h"
 #include "array.h"
 #include "domain.h"
@@ -13,7 +12,7 @@ static int assign_boundary_conditions_in_x(
   const int isize = domain->mysizes[0];
   const int jsize = domain->mysizes[1];
   const int ksize = domain->mysizes[2];
-  // set boundary values | 6
+  // set boundary values
   for(int k = 1; k <= ksize; k++){
     for(int j = 1; j <= jsize; j++){
       UZ(      0, j, k) = param_uz_xm; // no-slip
@@ -46,4 +45,3 @@ int fluid_update_boundaries_uz(
   assign_boundary_conditions_in_x(domain, uz->data);
   return 0;
 }
-#endif

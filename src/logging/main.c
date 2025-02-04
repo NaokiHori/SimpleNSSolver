@@ -62,7 +62,7 @@ static void show_progress (
   if (root == myrank) {
     FILE * fp = fileio.fopen(fname, "a");
     if (NULL != fp) {
-      // show progress to standard output and file | 8
+      // show progress to standard output and file
       // output to stdout and file
 #define MPRINT(...) { \
       fprintf(fp,     __VA_ARGS__); \

@@ -17,15 +17,11 @@ extern const bool param_add_buoyancy;
 // flags to specify the diffusive treatment of the momentum equations
 extern const bool param_m_implicit_x;
 extern const bool param_m_implicit_y;
-#if NDIMS == 3
 extern const bool param_m_implicit_z;
-#endif
 // flags to specify the diffusive treatment of the temperature equation
 extern const bool param_t_implicit_x;
 extern const bool param_t_implicit_y;
-#if NDIMS == 3
 extern const bool param_t_implicit_z;
-#endif
 
 /* boundary-condition.c */
 // NOTE: changing values may break the Nusselt balance
@@ -34,12 +30,10 @@ extern const bool param_t_implicit_z;
 extern const double param_uy_xm;
 // positive-x-wall velocity in y direction
 extern const double param_uy_xp;
-#if NDIMS == 3
 // negative-x-wall velocity in z direction
 extern const double param_uz_xm;
 // positive-x-wall velocity in z direction
 extern const double param_uz_xp;
-#endif
 // negative-x-wall temperature
 extern const double param_t_xm;
 // positive-x-wall temperature

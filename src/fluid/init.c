@@ -9,17 +9,13 @@
 #include "fileio.h"
 #include "array_macros/fluid/ux.h"
 #include "array_macros/fluid/uy.h"
-#if NDIMS == 3
 #include "array_macros/fluid/uz.h"
-#endif
 #include "array_macros/fluid/p.h"
 #include "array_macros/fluid/t.h"
 #include "array_macros/fluid/psi.h"
 #include "array_macros/fluid/srcux.h"
 #include "array_macros/fluid/srcuy.h"
-#if NDIMS == 3
 #include "array_macros/fluid/srcuz.h"
-#endif
 #include "array_macros/fluid/srct.h"
 
 static int allocate (
@@ -29,9 +25,7 @@ static int allocate (
   // velocity
   if (0 != array.create(domain, UX_NADDS, sizeof(double), &fluid->ux )) return 1;
   if (0 != array.create(domain, UY_NADDS, sizeof(double), &fluid->uy )) return 1;
-#if NDIMS == 3
   if (0 != array.create(domain, UZ_NADDS, sizeof(double), &fluid->uz )) return 1;
-#endif
   // pressure and scalar potential
   if (0 != array.create(domain, P_NADDS,   sizeof(double), &fluid->p  )) return 1;
   if (0 != array.create(domain, PSI_NADDS, sizeof(double), &fluid->psi)) return 1;
@@ -40,9 +34,7 @@ static int allocate (
   // Runge-Kutta source terms
   if (0 != rkbuffers_init(domain, SRCUX_NADDS, &fluid->srcux)) return 1;
   if (0 != rkbuffers_init(domain, SRCUY_NADDS, &fluid->srcuy)) return 1;
-#if NDIMS == 3
   if (0 != rkbuffers_init(domain, SRCUZ_NADDS, &fluid->srcuz)) return 1;
-#endif
   if (0 != rkbuffers_init(domain, SRCT_NADDS,  &fluid->srct )) return 1;
   return 0;
 }
@@ -60,9 +52,7 @@ static int report (
     printf("\tPr: % .7e\n", fluid->Pr);
     printf("\tdiffusive treatment in x: %s\n", param_m_implicit_x ? "implicit" : "explicit");
     printf("\tdiffusive treatment in y: %s\n", param_m_implicit_y ? "implicit" : "explicit");
-#if NDIMS == 3
     printf("\tdiffusive treatment in z: %s\n", param_m_implicit_z ? "implicit" : "explicit");
-#endif
     fflush(stdout);
   }
   return 0;
@@ -81,25 +71,21 @@ int fluid_init(
     const domain_t * domain,
     fluid_t * fluid
 ) {
-  // allocate arrays | 1
+  // allocate arrays
   if (0 != allocate(domain, fluid)) return 1;
-  // load flow fields | 7
+  // load flow fields
   if (0 != array.load(domain, dirname_ic, "ux", fileio.npy_double, &fluid->ux)) return 1;
   if (0 != array.load(domain, dirname_ic, "uy", fileio.npy_double, &fluid->uy)) return 1;
-#if NDIMS == 3
   if (0 != array.load(domain, dirname_ic, "uz", fileio.npy_double, &fluid->uz)) return 1;
-#endif
   if (0 != array.load(domain, dirname_ic,  "p", fileio.npy_double, &fluid-> p)) return 1;
   if (0 != array.load(domain, dirname_ic,  "t", fileio.npy_double, &fluid-> t)) return 1;
-  // impose boundary conditions and communicate halo cells | 7
+  // impose boundary conditions and communicate halo cells
   if (0 != fluid_update_boundaries_ux(domain, &fluid->ux)) return 1;
   if (0 != fluid_update_boundaries_uy(domain, &fluid->uy)) return 1;
-#if NDIMS == 3
   if (0 != fluid_update_boundaries_uz(domain, &fluid->uz)) return 1;
-#endif
   if (0 != fluid_update_boundaries_p(domain, &fluid->p)) return 1;
   if (0 != fluid_update_boundaries_t(domain, &fluid->t)) return 1;
-  // load diffusivities | 2
+  // load diffusivities
   if (0 != config.get_double("Pr", &fluid->Pr)) return 1;
   if (0 != config.get_double("Ra", &fluid->Ra)) return 1;
   report(domain->info, fluid);
