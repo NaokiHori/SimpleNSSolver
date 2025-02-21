@@ -285,5 +285,5 @@ as a set of conclusive equations.
 
 .. seealso::
 
-    For detailed derivation of the mentioned relations, visit `this page <https://naokihori.github.io/OrthogonalNS/index.html>`_.
+    For detailed derivation of the mentioned relations, visit `this page <https://naokihori.github.io/SimpleTCSolver/appendix/main.html>`_.
 
